@@ -1,0 +1,97 @@
+{
+  "schemaVersion": "1.0",
+  "note": "Provider 预设。这些是公开文档化的 OpenAI-compatible 接口地址，属于可替换配置而不是业务代码：Fork 后可以直接改这个文件，不需要动 React 组件（Engineering Bible §27/§28/§63）。地址与模型名可能随服务商调整，若测试连接失败请先用高级设置手动验证 Base URL。",
+  "defaultPresetId": "deepseek",
+  "providers": [
+    {
+      "id": "deepseek",
+      "name": "DeepSeek",
+      "baseURL": "https://api.deepseek.com/v1",
+      "protocol": "openai-compatible",
+      "supportsModelList": true,
+      "transport": "browser-direct",
+      "suggestedModels": ["deepseek-chat"],
+      "note": "国内可直连，OpenAI 兼容，支持 /models。"
+    },
+    {
+      "id": "moonshot",
+      "name": "Moonshot / Kimi",
+      "baseURL": "https://api.moonshot.cn/v1",
+      "protocol": "openai-compatible",
+      "supportsModelList": true,
+      "transport": "browser-direct",
+      "suggestedModels": ["moonshot-v1-8k"],
+      "note": "国内可直连，OpenAI 兼容。"
+    },
+    {
+      "id": "dashscope",
+      "name": "阿里云百炼 / DashScope",
+      "baseURL": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "protocol": "openai-compatible",
+      "supportsModelList": true,
+      "transport": "browser-direct",
+      "suggestedModels": ["qwen-plus"],
+      "note": "使用兼容模式地址；模型名请以控制台为准。"
+    },
+    {
+      "id": "siliconflow",
+      "name": "SiliconFlow 硅基流动",
+      "baseURL": "https://api.siliconflow.cn/v1",
+      "protocol": "openai-compatible",
+      "supportsModelList": true,
+      "transport": "browser-direct",
+      "suggestedModels": ["Qwen/Qwen2.5-7B-Instruct"],
+      "note": "聚合多家模型，模型名带命名空间前缀。"
+    },
+    {
+      "id": "openrouter",
+      "name": "OpenRouter",
+      "baseURL": "https://openrouter.ai/api/v1",
+      "protocol": "openai-compatible",
+      "supportsModelList": true,
+      "transport": "browser-direct",
+      "suggestedModels": ["openai/gpt-4o-mini"],
+      "note": "聚合网关，模型名带厂商前缀。是否允许浏览器直连取决于其当前 CORS 策略。"
+    },
+    {
+      "id": "openai",
+      "name": "OpenAI 官方",
+      "baseURL": "https://api.openai.com/v1",
+      "protocol": "openai-compatible",
+      "supportsModelList": true,
+      "transport": "browser-direct",
+      "suggestedModels": ["gpt-4o-mini"],
+      "note": "官方明确不建议在浏览器或移动端暴露长期 API Key（Engineering Bible §30）。若测试连接提示跨域限制，说明当前策略不允许浏览器直连，此时不要使用临时代理绕过，改用其他兼容服务或等待桌面版 LocalBridge。"
+    },
+    {
+      "id": "ollama",
+      "name": "本机 Ollama",
+      "baseURL": "http://localhost:11434/v1",
+      "protocol": "openai-compatible",
+      "supportsModelList": true,
+      "transport": "browser-direct",
+      "suggestedModels": ["qwen2.5:7b"],
+      "note": "完全本机运行，不出网。需要以允许跨域的方式启动 Ollama（设置 OLLAMA_ORIGINS）。API Key 可随意填写一个占位值。"
+    },
+    {
+      "id": "mock",
+      "name": "本地示例（不联网）",
+      "baseURL": "https://mock.local/v1",
+      "protocol": "mock",
+      "supportsModelList": true,
+      "transport": "browser-direct",
+      "suggestedModels": ["mock-report-model"],
+      "note": "不发出任何网络请求，用于验证报告链路。生成的报告会被标注为本地示例，不是模型输出。地址只是占位符，永远不会被访问。"
+    },
+    {
+      "id": "custom",
+      "name": "自定义 OpenAI 兼容服务",
+      "baseURL": "",
+      "protocol": "openai-compatible",
+      "supportsModelList": true,
+      "transport": "browser-direct",
+      "suggestedModels": [],
+      "note": "在高级设置中填写 Base URL 与模型名。"
+    }
+  ]
+}

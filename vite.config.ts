@@ -1,6 +1,8 @@
 import react from '@vitejs/plugin-react'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitest/config'
+import { VitePWA } from 'vite-plugin-pwa'
+import { readFileSync } from 'node:fs'
 
 /**
  * Engineering Bible §42 (Base Path).
@@ -16,9 +18,98 @@ import { defineConfig } from 'vitest/config'
  */
 const base = process.env.VITE_BASE ?? './'
 
+/**
+ * The app name is read from application.json so the tab title, the PWA manifest and the in-app
+ * ProductConfig cannot drift apart (Engineering Bible §64: the product name is configurable and
+ * must not be hard-coded in business logic).
+ */
+const appConfig = JSON.parse(
+  readFileSync(new URL('./application.json', import.meta.url), 'utf8'),
+) as {
+  name: string
+  shortName: string
+  description: string
+  themeColor: string
+  backgroundColor: string
+}
+
+/**
+ * Keep `index.html` in step with application.json so a rename is genuinely one file. Without this
+ * the name would live in three places (JSON, HTML title, ProductConfig) and drift.
+ */
+function htmlTitlePlugin() {
+  return {
+    name: 'cohortlens-html-title',
+    transformIndexHtml(html: string): string {
+      return html
+        .replace(/<title>.*<\/title>/, `<title>${appConfig.name}</title>`)
+        .replace(/(<meta name="description" content=")[^"]*(")/, `$1${appConfig.description}$2`)
+        .replace(/(<meta name="theme-color" content=")[^"]*(")/, `$1${appConfig.themeColor}$2`)
+        .replace(
+          /(<meta name="apple-mobile-web-app-title" content=")[^"]*(")/,
+          `$1${appConfig.shortName}$2`,
+        )
+    },
+  }
+}
+
 export default defineConfig({
   base,
-  plugins: [react()],
+  plugins: [
+    react(),
+    htmlTitlePlugin(),
+    /**
+     * PWA — Engineering Bible §40, Local MVP brief §21/§23.
+     *
+     * Deliberately minimal: precache the app shell and the bundled content, serve navigations from
+     * cache so the app opens offline, and update on the next load. No push notifications, no
+     * background sync, no remote update service, no elaborate runtime caching — those are excluded
+     * by the brief and would only add ways to fail.
+     *
+     * Verified locally with `npm run build` + `npm run preview`; this is NOT a claim that a
+     * production deployment has been verified (publish track is deferred).
+     */
+    VitePWA({
+      registerType: 'autoUpdate',
+      // Registration is owned by `src/app/service-worker.ts`, which degrades quietly when service
+      // workers are unavailable. The plugin must therefore not inject a second registration.
+      injectRegister: null,
+      // The service worker and manifest must be reachable from the deployed base path.
+      base: `${base.endsWith('/') ? base : `${base}/`}`,
+      scope: base,
+      includeAssets: ['icons/apple-touch-icon.png', 'icons/favicon-32x32.png'],
+      manifest: {
+        name: appConfig.name,
+        short_name: appConfig.shortName,
+        description: appConfig.description,
+        lang: 'zh-CN',
+        start_url: base,
+        scope: base,
+        display: 'standalone',
+        orientation: 'portrait',
+        theme_color: appConfig.themeColor,
+        background_color: appConfig.backgroundColor,
+        icons: [
+          { src: 'icons/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'icons/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+          {
+            src: 'icons/pwa-maskable-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+        ],
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,png,svg,webmanifest}'],
+        navigateFallback: 'index.html',
+        cleanupOutdatedCaches: true,
+        // No runtime caching rules: every asset the app needs is precached at install time.
+        runtimeCaching: [],
+      },
+      devOptions: { enabled: false },
+    }),
+  ],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

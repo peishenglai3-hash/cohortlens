@@ -313,6 +313,180 @@ h2 {
   border: 0;
 }
 
+/* ------------------------------------------------- banners and messages */
+
+.banner {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin: 12px 0;
+  background: var(--surface);
+}
+
+.banner-warn {
+  background: var(--notice);
+  border-color: var(--notice-border);
+}
+
+.banner-ok {
+  background: var(--boundary);
+  border-color: var(--boundary-border);
+}
+
+.banner-detail {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.technical {
+  margin-top: 6px;
+  font-size: 0.85rem;
+}
+
+.technical summary {
+  cursor: pointer;
+  color: var(--accent);
+}
+
+/* ------------------------------------------------------------- form fields */
+
+.field {
+  display: block;
+  margin: 10px 0;
+}
+
+.field-label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+
+.field input[type='text'],
+.field input[type='password'],
+.field input[type='number'],
+.field select {
+  width: 100%;
+  min-height: var(--tap);
+  padding: 8px 10px;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--tap);
+  margin-top: 6px;
+}
+
+.checkbox-row input {
+  width: 20px;
+  height: 20px;
+}
+
+.button.small {
+  min-height: 36px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+}
+
+.button.danger {
+  color: #8a2f2f;
+  border-color: #d8b4b4;
+}
+
+.button.danger:hover:not(:disabled) {
+  border-color: #8a2f2f;
+}
+
+/* ---------------------------------------------------------------- history */
+
+.history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.history-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.history-date {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.history-mini {
+  margin: 0 0 10px;
+  padding-left: 1.1em;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.tag-warn {
+  background: var(--notice);
+  color: #7a5b00;
+}
+
+/* ------------------------------------------------------------ ai report */
+
+.report-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.report-body {
+  border-top: 1px solid var(--border);
+  margin-top: 12px;
+  padding-top: 10px;
+}
+
+.report-body h3 {
+  font-size: 1rem;
+  margin: 16px 0 6px;
+}
+
+.report-body h3:first-child {
+  margin-top: 0;
+}
+
+.report-body ul {
+  margin: 0 0 8px;
+  padding-left: 1.2em;
+}
+
+.report-meta {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0 0 8px;
+}
+
+.report-quote {
+  margin: 0 0 10px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--notice-border);
+  background: var(--notice);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
 /* --------------------------------------------------------------- results */
 
 .meta-list {
@@ -487,11 +661,17 @@ h2 {
     --bg: #fff;
   }
 
+  /* Everything that is chrome, control or diagnostic is hidden; the report body stays. */
   .app-header,
   .app-footer,
   .actions,
   .actions-sticky,
-  .hint {
+  .hint,
+  .no-print,
+  .banner,
+  .progress,
+  .technical,
+  .report-status-row {
     display: none !important;
   }
 
@@ -507,11 +687,18 @@ h2 {
     break-inside: avoid;
   }
 
-  .progress {
-    display: none;
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
   }
 
   .evidence[open] summary {
     color: #000;
+  }
+
+  /* Links print as text; a printed report must not invite a click. */
+  a[href^='#']::after {
+    content: '';
   }
 }

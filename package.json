@@ -21,9 +21,13 @@
     "validate:questions": "tsx scripts/validate-question-pack.ts",
     "validate:config": "tsx scripts/validate-config.ts",
     "demo:assessment": "tsx scripts/demo-assessment.ts",
-    "gate:local": "npm run lint && npm run format:check && npm run typecheck && npm run validate:questions && npm run test:coverage && npm run build && npm run demo:assessment"
+    "gate:local": "npm run lint && npm run format:check && npm run typecheck && npm run validate:questions && npm run validate:config && npm run test:coverage && npm run e2e:desktop",
+    "e2e": "npm run build && playwright test",
+    "e2e:desktop": "npm run build && playwright test --project=chromium-desktop",
+    "gate:local:fast": "npm run lint && npm run format:check && npm run typecheck && npm run validate:questions && npm run test:coverage"
   },
   "dependencies": {
+    "idb": "^8.0.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "7.1.1",
@@ -32,6 +36,7 @@
   },
   "devDependencies": {
     "@eslint/js": "9.17.0",
+    "@playwright/test": "^1.62.0",
     "@testing-library/jest-dom": "6.6.3",
     "@testing-library/react": "16.1.0",
     "@testing-library/user-event": "14.5.2",
@@ -44,6 +49,7 @@
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-react-hooks": "5.1.0",
     "eslint-plugin-react-refresh": "0.4.16",
+    "fake-indexeddb": "^6.0.0",
     "globals": "15.14.0",
     "jsdom": "25.0.1",
     "prettier": "3.4.2",
@@ -51,6 +57,7 @@
     "typescript": "5.7.2",
     "typescript-eslint": "8.19.0",
     "vite": "6.0.7",
+    "vite-plugin-pwa": "^0.21.1",
     "vitest": "3.0.5"
   }
 }

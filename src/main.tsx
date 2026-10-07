@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { App } from './app/App.tsx'
+import { registerServiceWorker } from './app/service-worker.ts'
 import './styles.css'
 
 const container = document.getElementById('root')
@@ -13,3 +14,6 @@ createRoot(container).render(
     <App />
   </StrictMode>,
 )
+
+// Registered after render so a registration failure can never delay first paint.
+registerServiceWorker()

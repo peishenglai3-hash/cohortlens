@@ -28,3 +28,9 @@ Thumbs.db
 # Local assessment exports (may contain a respondent's raw answers)
 exports/
 *.cohortlens.json
+
+# Playwright
+playwright-report/
+test-results/
+blob-report/
+

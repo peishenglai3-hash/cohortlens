@@ -2,9 +2,17 @@
  * Product configuration — Engineering Bible §64.
  *
  * The final product name is NOT frozen (Engineering Bible header: "最终产品名称：未冻结"). It is
- * therefore a single value in this file and appears nowhere in business logic. Renaming the
- * product is a one-line change here, and the frozen question pack is never touched.
+ * therefore a single value — `application.json` at the repository root — which the Vite config also
+ * feeds into `index.html` and the PWA manifest. Renaming the product is a one-file change and the
+ * frozen question pack is never touched.
  */
+import appConfigRaw from '../../application.json'
+
+const appConfig = appConfigRaw as {
+  name: string
+  shortName: string
+  description: string
+}
 
 export interface ProductConfig {
   name: string
@@ -19,10 +27,9 @@ export interface ProductConfig {
 }
 
 export const PRODUCT_CONFIG: ProductConfig = {
-  name: 'CohortLens',
+  name: appConfig.name,
   subtitle: '本地优先的结构化测评工具',
-  description:
-    '面向小型团队、兴趣共同体与协作组织的本地优先结构化测评工具。系统整理参与者已经主动表达的信息，不代替人做吸纳、排除或政治判断。',
+  description: appConfig.description,
   assessment: {
     questionPackId: 'cohortlens-cn-v1',
     scoringModelId: 'scoring-v1',

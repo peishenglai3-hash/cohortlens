@@ -1,9 +1,22 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useAssessmentStore } from '../../app/store.ts'
+import { useAppStore } from '../../app/store.ts'
 import { loadContentBundle } from '../../content/load-content.ts'
 import { RESULT_BOUNDARY_NOTICE } from '../../config/product.ts'
 import { LAYERS, type AssessmentResult, type Layer } from '../../domain/schemas.ts'
-import { formatPercent } from '../../utils/ids.ts'
+import { formatDateTime, formatPercent } from '../../utils/format.ts'
+import { API_KEY_SESSION } from '../../infrastructure/ai/session-key.ts'
+import { createProvider } from '../../infrastructure/ai/factory.ts'
+import { generateReport, ReportGenerationError } from '../../infrastructure/ai/report-service.ts'
+import { classifyError, STATUS_LABELS } from '../../infrastructure/ai/adapters/openai-compatible.ts'
+import {
+  auditExport,
+  buildExportBundle,
+  downloadJson,
+  exportFileName,
+} from '../../infrastructure/export/json-export.ts'
+import { getRepositories } from '../../infrastructure/storage/index.ts'
+import { ReportPanel } from './ReportPanel.tsx'
 
 const LAYER_TITLES: Record<Layer, string> = {
   theory_value: 'A 层 · 理论与问题理解',
@@ -26,25 +39,43 @@ function ProfileBar({ score }: { score: number }) {
 }
 
 /**
- * Result screen — Engineering Bible §58.
+ * Result screen — Engineering Bible §58, §59 and the Local MVP brief §7.
  *
- * Profile cards + progress bars + role cards + collapsible evidence. Deliberately no leaderboard,
- * no red/green pass-fail, and no single total. §59 requires "这个判断主要来自哪些题目？" to be
- * answerable, so every dimension carries an expandable evidence list with the original prompt and
- * the respondent's own choice.
+ * Profile cards + progress bars + role cards + collapsible evidence. Nothing here recomputes a
+ * score: the page renders the Structured Result the engine produced, verbatim. Deliberately absent:
+ * leaderboards, red/green pass-fail, admissions wording, and any single total (§16, brief §7).
  */
 export function ResultPage() {
-  const { result, session } = useAssessmentStore()
+  const session = useAppStore((state) => state.session)
+  const result = useAppStore((state) => state.result)
+  const report = useAppStore((state) => state.report)
+  const reportStatus = useAppStore((state) => state.reportStatus)
+  const reportError = useAppStore((state) => state.reportError)
+  const settings = useAppStore((state) => state.settings)
+  const setReport = useAppStore((state) => state.setReport)
+  const setReportStatus = useAppStore((state) => state.setReportStatus)
+  const saveSettings = useAppStore((state) => state.saveSettings)
+
+  const [exportMessage, setExportMessage] = useState<string | null>(null)
+  const [offline, setOffline] = useState(
+    () => typeof navigator !== 'undefined' && !navigator.onLine,
+  )
+
   const { pack } = loadContentBundle()
 
   if (!result || !session) {
     return (
       <main className="page">
         <h1>还没有结果</h1>
-        <p>请先完成一次测评。当前切片的结果保存在内存中，刷新页面后需要重新测评。</p>
-        <Link className="button primary" to="/assessment">
-          去测评
-        </Link>
+        <p>请先完成一次测评，或在历史记录里打开一次已经完成的结果。</p>
+        <div className="actions">
+          <Link className="button primary" to="/assessment">
+            去测评
+          </Link>
+          <Link className="button" to="/history">
+            历史记录
+          </Link>
+        </div>
       </main>
     )
   }
@@ -60,21 +91,79 @@ export function ResultPage() {
       .map((dimension) => `${dimension.label} ${dimension.normalizedScore}`)
       .join(' · ')
 
+  const handleExport = async () => {
+    const bundle = buildExportBundle({ session, result, report })
+    const audit = auditExport(bundle)
+    if (!audit.clean) {
+      // Refuse rather than ship a file that might contain a credential. This should be
+      // unreachable, which is exactly why it is checked.
+      setExportMessage(
+        `导出已中止：检测到可疑内容（${audit.findings.join('；')}）。请把这条信息反馈给开发者。`,
+      )
+      return
+    }
+    downloadJson(bundle, exportFileName(session, bundle.exportedAt))
+    setExportMessage('JSON 已导出。文件里没有 API Key，只有本次作答与结构化结果。')
+  }
+
+  const handleGenerateReport = async () => {
+    const apiKey = API_KEY_SESSION.get()
+    if (!apiKey) {
+      setReportStatus('failed', '还没有配置 API Key。请先到设置页填写，基础结果不受影响。')
+      return
+    }
+    setReportStatus('generating')
+    try {
+      const provider = createProvider(settings.provider)
+      const repos = await getRepositories()
+      const generated = await generateReport({
+        result,
+        pack,
+        config: settings.provider,
+        apiKey,
+        provider,
+        reports: repos.reports,
+      })
+      setReport(generated.record)
+      await saveSettings({ provider: settings.provider })
+    } catch (error) {
+      if (error instanceof ReportGenerationError) {
+        const cause = error.cause
+        // Reuse the same diagnosis vocabulary as "test connection" so the user sees one
+        // consistent explanation for one underlying problem.
+        const diagnosis =
+          cause instanceof Error
+            ? classifyError(cause, settings.provider)
+            : { status: 'unknown_error' as const, message: error.message }
+        setReportStatus(
+          'failed',
+          `${error.message}（${STATUS_LABELS[diagnosis.status]}：${diagnosis.message}）`,
+        )
+        return
+      }
+      setReportStatus('failed', error instanceof Error ? error.message : String(error))
+    }
+  }
+
+  const keyConfigured = Boolean(API_KEY_SESSION.get() || settings.provider.providerId)
+
   return (
     <main className="page page-result">
       <h1>结构化结果</h1>
-      <p className="subtitle">第一阶段全部在你的设备上完成，未调用任何 LLM。</p>
+      <p className="subtitle">
+        第一阶段评分全部在你的设备上完成，未调用任何 LLM。AI 综合报告是可选的最后一步。
+      </p>
 
       <section className="card">
         <h2>本次记录</h2>
         <dl className="meta-list">
           <div>
-            <dt>会话 ID</dt>
-            <dd>{session.id}</dd>
+            <dt>完成时间</dt>
+            <dd>{result.generatedAt ? formatDateTime(result.generatedAt) : '(进行中)'}</dd>
           </div>
           <div>
-            <dt>生成时间</dt>
-            <dd>{result.generatedAt}</dd>
+            <dt>会话 ID</dt>
+            <dd>{session.id}</dd>
           </div>
           <div>
             <dt>题库版本</dt>
@@ -96,6 +185,20 @@ export function ResultPage() {
           </div>
         </dl>
         <p className="hint">摘要：{detail(result)}</p>
+        {/*
+          Persistence indicator. It exists so both a user and an automated test can tell when the
+          result has actually reached IndexedDB: `finish()` writes asynchronously, and reloading
+          before that write lands would show the previous state.
+        */}
+        <p
+          className="hint"
+          data-testid="persistence-state"
+          data-persisted={Boolean(session.resultId)}
+        >
+          {session.resultId
+            ? '本次结果已保存到本机浏览器，刷新或关闭后仍可从历史记录打开。'
+            : '正在保存本次结果到本机…'}
+        </p>
       </section>
 
       <section className="card notice notice-boundary">
@@ -111,12 +214,16 @@ export function ResultPage() {
         const rows = result.dimensions.filter((dimension) => dimension.layer === layer)
         if (rows.length === 0) return null
         return (
-          <section className="card" key={layer}>
+          <section className="card" key={layer} data-testid={`layer-${layer}`}>
             <h2>{LAYER_TITLES[layer]}</h2>
             <p className="hint">{LAYER_NOTES[layer]}</p>
             <ul className="profile-list">
               {rows.map((dimension) => (
-                <li key={dimension.id} className="profile-row">
+                <li
+                  key={dimension.id}
+                  className="profile-row"
+                  data-testid={`dimension-${dimension.id}`}
+                >
                   <div className="profile-head">
                     <span className="profile-label">{dimension.label}</span>
                     <span className="profile-score">{dimension.normalizedScore}</span>
@@ -140,8 +247,11 @@ export function ResultPage() {
                       {dimension.evidenceQuestionIds.map((questionId) => {
                         const question = questionById.get(questionId)
                         const chosenOptionId = session.answers[questionId]
+                        const evidence = result.evidence.find(
+                          (item) => item.questionId === questionId,
+                        )
                         return (
-                          <li key={questionId}>
+                          <li key={questionId} data-testid={`evidence-${questionId}`}>
                             <p className="evidence-prompt">
                               <strong>{questionId}</strong>{' '}
                               {question?.prompt ?? '(题目已不在题库中)'}
@@ -149,12 +259,8 @@ export function ResultPage() {
                             <p className="evidence-answer">
                               你的作答：
                               {chosenOptionId ? optionText(questionId, chosenOptionId) : '(未作答)'}
-                              {' · '}本维度信号：
-                              {result.evidence.find((item) => item.questionId === questionId)
-                                ?.signal ?? '—'}{' '}
-                              /{' '}
-                              {result.evidence.find((item) => item.questionId === questionId)
-                                ?.maxSignal ?? '—'}
+                              {' · '}本维度信号：{evidence?.signal ?? '—'} /{' '}
+                              {evidence?.maxSignal ?? '—'}
                             </p>
                           </li>
                         )
@@ -168,14 +274,14 @@ export function ResultPage() {
         )
       })}
 
-      <section className="card">
+      <section className="card" data-testid="role-fit-section">
         <h2>角色适配（只使用 B / C 层维度）</h2>
         <p className="hint">
-          下面的分数由合作与技能层维度加权得到，权重里不含任何理论层维度，也不是在判断"你是谁"。
+          下面的分数由合作与技能层维度加权得到，权重里不含任何理论层维度，也不是在判断「你是谁」。
         </p>
         <ul className="role-list">
           {result.roleFits.map((fit) => (
-            <li key={fit.roleId} className="role-card">
+            <li key={fit.roleId} className="role-card" data-testid={`role-${fit.roleId}`}>
               <div className="profile-head">
                 <span className="profile-label">{fit.name}</span>
                 <span className="profile-score">{fit.fitScore}</span>
@@ -187,10 +293,10 @@ export function ResultPage() {
         </ul>
       </section>
 
-      <section className="card">
+      <section className="card" data-testid="consistency-section">
         <h2>回答一致性与稳定度</h2>
         <p className="hint">
-          这一节只描述答卷内部的方向差异，不是"真实性"评分，也不能推出任何关于人的结论。
+          这一节只描述答卷内部的方向差异，不是「真实性」评分，也不能推出任何关于人的结论。
         </p>
         <dl className="meta-list">
           <div>
@@ -221,7 +327,7 @@ export function ResultPage() {
 
       <section className="card">
         <h2>当前回答中较明显的方面</h2>
-        <ul>
+        <ul data-testid="strengths">
           {result.strengths.map((strength) => (
             <li key={strength}>{strength}</li>
           ))}
@@ -230,12 +336,23 @@ export function ResultPage() {
 
       <section className="card">
         <h2>可能需要更多信息的方向</h2>
-        <ul>
+        <ul data-testid="development-areas">
           {result.developmentAreas.map((area) => (
             <li key={area}>{area}</li>
           ))}
         </ul>
       </section>
+
+      <ReportPanel
+        report={report}
+        status={reportStatus}
+        error={reportError}
+        isMock={report?.isMock ?? settings.provider.providerId === 'mock'}
+        keyConfigured={keyConfigured}
+        offline={offline}
+        onToggleOffline={() => setOffline((value) => !value)}
+        onGenerate={() => void handleGenerateReport()}
+      />
 
       <section className="card">
         <h2>抽题引擎阶段实际状态</h2>
@@ -254,28 +371,42 @@ export function ResultPage() {
 
       <section className="card">
         <h2>测评局限性</h2>
-        <ul>
+        <ul data-testid="limitations">
           {result.limitations.map((limitation) => (
             <li key={limitation}>{limitation}</li>
           ))}
         </ul>
       </section>
 
-      <div className="actions">
-        <Link className="button" to="/assessment">
-          再测一次
-        </Link>
-        <button type="button" className="button" onClick={() => window.print()}>
+      <div className="actions no-print">
+        <button
+          type="button"
+          className="button primary"
+          onClick={() => void handleExport()}
+          data-testid="export-json"
+        >
+          导出 JSON
+        </button>
+        <button
+          type="button"
+          className="button"
+          onClick={() => window.print()}
+          data-testid="print-result"
+        >
           打印 / 另存为 PDF
         </button>
-        <Link className="button" to="/">
-          回首页
+        <Link className="button" to="/history">
+          历史记录
+        </Link>
+        <Link className="button" to="/settings">
+          AI 报告设置
         </Link>
       </div>
-      <p className="hint">
-        JSON 导出与历史记录尚未接入本切片：引擎结果已经是可 JSON 序列化的结构化对象（见
-        exports/demo-assessment-result.json 与 npm run demo:assessment），落盘层是下一步工作。
-      </p>
+      {exportMessage && (
+        <p className="hint" data-testid="export-message">
+          {exportMessage}
+        </p>
+      )}
     </main>
   )
 }

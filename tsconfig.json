@@ -5,7 +5,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
-    "types": ["vite/client", "vitest/globals", "node"],
+    "types": ["vite/client", "vitest/globals", "node", "vite-plugin-pwa/client"],
 
     "strict": true,
     "noUncheckedIndexedAccess": true,

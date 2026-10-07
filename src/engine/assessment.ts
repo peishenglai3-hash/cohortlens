@@ -45,10 +45,12 @@ export function createAssessment({
   const { pack, scoring, roleModel } = bundle
   const resolvedSeed = seed ?? createSeed()
   const sampled = sampleQuestionSet({ pack, scoring, seed: resolvedSeed, previousSessions })
+  const timestamp = createdAt ?? nowIso()
 
   const session = assessmentSessionSchema.parse({
     id: sessionId ?? createId('session'),
-    createdAt: createdAt ?? nowIso(),
+    createdAt: timestamp,
+    updatedAt: timestamp,
     questionPackId: pack.id,
     questionPackVersion: pack.version,
     scoringVersion: scoring.version,
@@ -56,6 +58,7 @@ export function createAssessment({
     seed: resolvedSeed,
     questionIds: sampled.questionIds,
     answers: {},
+    shortDimension: sampled.layerAShortDimension,
     status: 'draft',
   })
 
@@ -71,6 +74,7 @@ export function answerQuestion(
   session: AssessmentSession,
   questionId: string,
   optionId: string,
+  answeredAt: string = nowIso(),
 ): AssessmentSession {
   if (!session.questionIds.includes(questionId)) {
     throw new Error(`题目 ${questionId} 不在本次问卷中，无法作答`)
@@ -78,6 +82,7 @@ export function answerQuestion(
   return assessmentSessionSchema.parse({
     ...session,
     answers: { ...session.answers, [questionId]: optionId },
+    updatedAt: answeredAt,
   })
 }
 
@@ -98,6 +103,7 @@ export function completeAssessment(
   const generatedAt = options.generatedAt ?? nowIso()
   const completed = assessmentSessionSchema.parse({
     ...session,
+    updatedAt: generatedAt,
     completedAt: generatedAt,
     status: 'completed',
   })

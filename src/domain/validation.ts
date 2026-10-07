@@ -69,23 +69,12 @@ export interface ValidationInput {
 }
 
 /**
- * Human-readable labels for the "forbidden output" check. The frozen role model ships a short
- * `forbiddenLanguage` list; the product boundary in Engineering Bible §24 also forbids
- * trustworthiness and danger labels, which the shipped list omits. The union is enforced here
- * instead of editing the frozen content file (see ADR-007).
+ * Sourced from `domain/boundaries.ts`, which is the single definition shared by the role-fit
+ * engine, the report chain and this validator (ADR-007). Imported for local use and re-exported
+ * so existing call sites keep working.
  */
-export const REQUIRED_FORBIDDEN_LANGUAGE = [
-  '值得信任',
-  '不值得信任',
-  '危险人物',
-  '撒谎概率',
-  '欺骗指数',
-  '真实性评分',
-  '应当吸纳',
-  '应当淘汰',
-  '政治可靠',
-  '忠诚',
-] as const
+import { REQUIRED_FORBIDDEN_LANGUAGE } from './boundaries.ts'
+export { REQUIRED_FORBIDDEN_LANGUAGE }
 
 function byId<T extends { id: string }>(items: readonly T[]): Map<string, T> {
   const map = new Map<string, T>()

@@ -1,4 +1,4 @@
-import { REQUIRED_FORBIDDEN_LANGUAGE } from '../domain/validation.ts'
+import { MASK_PLACEHOLDER, REQUIRED_FORBIDDEN_LANGUAGE } from '../domain/boundaries.ts'
 import {
   roleWeightMap,
   type DimensionResult,
@@ -56,9 +56,14 @@ export function auditRoleModel(roleModel: RoleModel, scoring: ScoringModel): Rol
 }
 
 function sanitise(text: string, forbidden: readonly string[]): string {
+  // Same longest-first rule as `domain/boundaries.ts#maskForbiddenLanguage`: masking `值得信任`
+  // before `不值得信任` would leave `不[已按产品边界屏蔽]` behind and leak the original meaning.
+  const phrases = [...new Set(forbidden)]
+    .filter((phrase) => phrase.length > 0)
+    .sort((a, b) => b.length - a.length)
   let output = text
-  for (const phrase of forbidden) {
-    if (output.includes(phrase)) output = output.split(phrase).join('[已按产品边界屏蔽]')
+  for (const phrase of phrases) {
+    if (output.includes(phrase)) output = output.split(phrase).join(MASK_PLACEHOLDER)
   }
   return output
 }

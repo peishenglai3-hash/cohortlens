@@ -1,0 +1,8 @@
+{
+  "name": "CohortLens",
+  "shortName": "CohortLens",
+  "description": "本地优先的结构化测评工具：整理参与者已经主动表达的信息，不代替人做吸纳、排除或政治判断。",
+  "themeColor": "#3b5b7a",
+  "backgroundColor": "#f7f8fa",
+  "note": "产品名称的唯一可配置来源之一。最终名称尚未冻结：改这里的 name/shortName 即可，不需要动业务代码（Engineering Bible §64）。index.html 的标题与 PWA manifest 都从这里派生。"
+}

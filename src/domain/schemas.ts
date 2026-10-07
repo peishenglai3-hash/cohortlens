@@ -252,6 +252,8 @@ export const assessmentSessionSchema = z
   .object({
     id: z.string().min(1),
     createdAt: z.string().min(1),
+    /** Bumped on every answer so History can order by "last touched" (§37). */
+    updatedAt: z.string().min(1),
     completedAt: z.string().min(1).optional(),
 
     questionPackId: z.string().min(1),
@@ -266,6 +268,19 @@ export const assessmentSessionSchema = z
      * option shuffling cannot corrupt a saved session.
      */
     answers: z.record(z.string(), z.string()),
+
+    /**
+     * Layer-A dimension that received one fewer item, recorded so a later session can rotate the
+     * shortfall instead of fixing the same dimension forever (source README line 26).
+     */
+    shortDimension: z.string().min(1).nullable().optional(),
+
+    /**
+     * Where the respondent had got to, so a refresh returns them to the question they were reading
+     * rather than to the first unanswered one. Engineering Bible §54 says a refresh must not lose
+     * progress; losing your place is losing progress.
+     */
+    lastIndex: z.number().int().nonnegative().optional(),
 
     status: sessionStatusSchema,
     resultId: z.string().min(1).optional(),
