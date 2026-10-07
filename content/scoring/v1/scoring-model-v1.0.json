@@ -1,0 +1,149 @@
+{
+  "id": "scoring-v1",
+  "version": "1.0.0",
+  "scale": {
+    "min": 0,
+    "maxPerQuestion": 3,
+    "normalizedMin": 0,
+    "normalizedMax": 100
+  },
+  "layerA": {
+    "name": "理论与问题理解",
+    "dimensions": {
+      "conceptual_understanding": "基础概念理解",
+      "theory_reality": "理论—现实转换",
+      "organizational_judgment": "组织实践判断",
+      "reflexive_judgment": "反身性与判断"
+    },
+    "useInRoleFit": false,
+    "useForAdmissionDecision": false
+  },
+  "layerB": {
+    "name": "合作与行为",
+    "dimensions": {
+      "responsibility": "责任承担",
+      "communication": "沟通",
+      "conflict_handling": "冲突处理",
+      "initiative": "主动性",
+      "reliability": "可靠性",
+      "reflection": "反思与适应"
+    }
+  },
+  "layerC": {
+    "name": "技能与角色",
+    "dimensions": {
+      "research_skill": "研究能力",
+      "execution_skill": "执行能力",
+      "coordination_skill": "协调能力",
+      "organization_skill": "组织能力",
+      "technical_skill": "技术支持",
+      "communication_skill": "传播表达"
+    }
+  },
+  "normalization": "dimension_score = round(sum(answer_score) / max_possible_for_answered_items * 100)",
+  "confidence": {
+    "base": "answered_items / expected_items",
+    "consistencyGroups": [
+      {
+        "id": "CG01",
+        "questions": [
+          "B001",
+          "B027"
+        ],
+        "type": "directional_alignment",
+        "note": "deadline/estimate handling"
+      },
+      {
+        "id": "CG02",
+        "questions": [
+          "B007",
+          "B014"
+        ],
+        "type": "directional_alignment",
+        "note": "disagreement/criticism handling"
+      },
+      {
+        "id": "CG03",
+        "questions": [
+          "B019",
+          "B023"
+        ],
+        "type": "directional_alignment",
+        "note": "initiative under ambiguity"
+      },
+      {
+        "id": "CG04",
+        "questions": [
+          "B025",
+          "B030"
+        ],
+        "type": "directional_alignment",
+        "note": "commitment/capacity management"
+      },
+      {
+        "id": "CG05",
+        "questions": [
+          "A026",
+          "B031"
+        ],
+        "type": "directional_alignment",
+        "note": "self-correction after failure"
+      },
+      {
+        "id": "CG06",
+        "questions": [
+          "A060",
+          "B036"
+        ],
+        "type": "directional_alignment",
+        "note": "human judgment vs assessment result"
+      },
+      {
+        "id": "CG07",
+        "questions": [
+          "A041",
+          "A058"
+        ],
+        "type": "complementary",
+        "note": "privacy and information security proportionality"
+      },
+      {
+        "id": "CG08",
+        "questions": [
+          "A039",
+          "A054"
+        ],
+        "type": "complementary",
+        "note": "minority voice and internal pluralism"
+      }
+    ],
+    "rule": "Only reduce confidence or flag '需要进一步了解'; never output lie/deception probability."
+  },
+  "interpretationBands": [
+    {
+      "min": 0,
+      "max": 39,
+      "label": "当前材料较弱/需更多信息"
+    },
+    {
+      "min": 40,
+      "max": 59,
+      "label": "中等表现"
+    },
+    {
+      "min": 60,
+      "max": 79,
+      "label": "较明显表现"
+    },
+    {
+      "min": 80,
+      "max": 100,
+      "label": "当前问卷中表现突出"
+    }
+  ],
+  "warnings": [
+    "分数只在本题库内部有意义，不代表人口常模百分位。",
+    "不要把各维度相加成单一综合总分。",
+    "不要把理论层分数解释为政治立场或忠诚程度。"
+  ]
+}

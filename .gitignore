@@ -1,0 +1,30 @@
+# Node
+node_modules/
+*.log
+npm-debug.log*
+.pnpm-debug.log*
+
+# Build output
+dist/
+dist-ssr/
+*.local
+
+# Test / coverage
+coverage/
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Environment & secrets — Engineering Bible §30 / Release Gate #20
+# No API key may ever be committed. `.env.example` is the only env file allowed in git.
+.env
+.env.*
+!.env.example
+
+# Local assessment exports (may contain a respondent's raw answers)
+exports/
+*.cohortlens.json

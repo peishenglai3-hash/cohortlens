@@ -1,0 +1,94 @@
+name: CI
+
+# Engineering Bible §47: a pull request or push to main must at least run install, lint,
+# typecheck, test and build. Core scoring tests failing must block a release, so `pnpm test`
+# runs without `continue-on-error` and includes the coverage thresholds from vite.config.ts.
+#
+# package manager note: this repo installs with npm (release gate §66 says `npm install`), so CI
+# pins npm. `package-lock.json` is committed for reproducible installs.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Validate frozen question pack
+        run: npm run validate:questions
+
+      - name: Unit / integration tests with coverage gates
+        run: npm run test:coverage
+
+      - name: Build static output
+        run: npm run build
+
+      - name: Prove the deterministic core still reproduces
+        run: npm run demo:assessment
+
+      - name: Fail if any API key material reached a tracked file
+        run: |
+          if git grep -nE '(sk-[A-Za-z0-9]{16,}|api[_-]?key\s*[:=]\s*"[^"]{8,}"|Bearer [A-Za-z0-9._-]{16,})' -- . ':!package-lock.json'; then
+            echo "::error::检测到疑似 API Key 被提交，发布闸门第 20 条失败。"
+            exit 1
+          fi
+          echo "未发现疑似 API Key。"
+
+      - name: Base-path build for GitHub Pages subpath (§42)
+        run: VITE_BASE=/cohortlens/ npm run build
+
+      - name: Assert every asset reference carries the configured base
+        run: |
+          # A bare "/assets/..." reference means a hard-coded absolute path leaked in; under a
+          # Pages subpath it 404s. With VITE_BASE=/cohortlens/ every reference must be prefixed.
+          if grep -nE '(src|href)="/assets/' dist/index.html; then
+            echo "::error::构建产物出现裸 /assets/ 绝对路径，GitHub Pages 子路径将 404。"
+            exit 1
+          fi
+          grep -qE '(src|href)="/cohortlens/assets/' dist/index.html
+          echo "构建产物全部资源路径已带 base 前缀。"
+
+      - name: Assert the default build stays relative-portable (§42)
+        run: |
+          # With no VITE_BASE the default base must be './' so dist/ can also be opened from a
+          # file:// URL or served from any nested directory without configuration.
+          npm run build
+          if grep -nE '(src|href)="/' dist/index.html; then
+            echo "::error::默认构建出现根绝对路径；静态托管与非根路径部署会失败。"
+            exit 1
+          fi
+          grep -qE '(src|href)="\./assets/' dist/index.html
+          echo "默认构建使用相对路径，可直接从任意静态位置打开。"
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: cohortlens-dist
+          path: dist
+          retention-days: 7

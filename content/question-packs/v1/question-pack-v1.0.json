@@ -1,0 +1,6076 @@
+{
+  "id": "cohortlens-cn-v1",
+  "name": "CohortLens 中文一期题库",
+  "version": "1.0.0",
+  "schemaVersion": "1.0",
+  "language": "zh-CN",
+  "description": "120题一期题库：理论/问题理解60，合作/行为36，技能/角色24。用于自愿结构化自评与团队协作讨论，不用于自动录取/淘汰或政治可靠性判断。",
+  "createdAt": "2026-10-07",
+  "assessmentPolicy": {
+    "totalQuestions": 30,
+    "quota": {
+      "theory_value": 15,
+      "cooperation_behavior": 9,
+      "skill_role": 6
+    },
+    "subQuota": {
+      "theory_value": {
+        "conceptual_understanding": 4,
+        "theory_reality": 4,
+        "organizational_judgment": 4,
+        "reflexive_judgment": 3
+      },
+      "cooperation_behavior": {
+        "minimumPerDimension": 1,
+        "remaining": 3,
+        "strategy": "balanced_random"
+      },
+      "skill_role": {
+        "exactlyPerDimension": 1
+      }
+    },
+    "sampling": {
+      "seeded": true,
+      "avoidDuplicateQuestion": true,
+      "avoidSameFamily": true,
+      "optionShuffle": true
+    }
+  },
+  "measurementNotice": {
+    "validatedPsychometricInstrument": false,
+    "notes": [
+      "本题库是团队协作型结构化问卷，不是经过标准化常模验证的心理测量工具。",
+      "理论层只测概念理解、理论—现实转换、组织实践判断与反身性判断，不生成政治忠诚度、政治可靠性或意识形态纯度。",
+      "合作与技能层属于自陈材料，容易受到社会赞许性影响；结果应与真实合作经历结合阅读。",
+      "角色适配不得使用理论/政治观点作为权重，只使用合作行为与技能信号。",
+      "系统不得根据本问卷自动作出吸纳、淘汰、录用或排除决定。"
+    ]
+  },
+  "questions": [
+    {
+      "id": "A001",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "conceptual_understanding",
+      "subDimension": "生产力与生产关系",
+      "prompt": "如果一个社会的技术工具快速变化，但劳动组织、产权安排和分配方式基本不变，较稳妥的分析起点是什么？",
+      "scenarioType": "concept",
+      "difficulty": 2,
+      "tags": [
+        "theory",
+        "concept"
+      ],
+      "reverse": false,
+      "familyId": "F-A001",
+      "options": [
+        {
+          "id": "A001_A",
+          "text": "只看技术升级速度",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        },
+        {
+          "id": "A001_B",
+          "text": "同时考察技术变化如何与生产关系发生张力",
+          "scoring": {
+            "conceptual_understanding": 3
+          }
+        },
+        {
+          "id": "A001_C",
+          "text": "假定技术会自动带来更平等结果",
+          "scoring": {
+            "conceptual_understanding": 1
+          }
+        },
+        {
+          "id": "A001_D",
+          "text": "只讨论个体态度变化",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "conceptual_understanding"
+      }
+    },
+    {
+      "id": "A002",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "conceptual_understanding",
+      "subDimension": "历史唯物主义",
+      "prompt": "“历史条件”在分析社会现象时最接近下面哪种含义？",
+      "scenarioType": "concept",
+      "difficulty": 2,
+      "tags": [
+        "theory",
+        "concept"
+      ],
+      "reverse": false,
+      "familyId": "F-A002",
+      "options": [
+        {
+          "id": "A002_A",
+          "text": "任何事情都由历史决定",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        },
+        {
+          "id": "A002_B",
+          "text": "具体制度、资源、关系和既有路径共同限定行动空间",
+          "scoring": {
+            "conceptual_understanding": 3
+          }
+        },
+        {
+          "id": "A002_C",
+          "text": "过去发生过的事情本身",
+          "scoring": {
+            "conceptual_understanding": 1
+          }
+        },
+        {
+          "id": "A002_D",
+          "text": "只要引用历史案例即可",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "conceptual_understanding"
+      }
+    },
+    {
+      "id": "A003",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "conceptual_understanding",
+      "subDimension": "阶级分析",
+      "prompt": "在分析利益冲突时，阶级分析最重要的不是给人贴标签，而是考察什么？",
+      "scenarioType": "concept",
+      "difficulty": 2,
+      "tags": [
+        "theory",
+        "concept"
+      ],
+      "reverse": false,
+      "familyId": "F-A003",
+      "options": [
+        {
+          "id": "A003_A",
+          "text": "谁说话最激烈",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        },
+        {
+          "id": "A003_B",
+          "text": "不同群体在生产、分配与权力关系中的位置",
+          "scoring": {
+            "conceptual_understanding": 3
+          }
+        },
+        {
+          "id": "A003_C",
+          "text": "谁拥有更多粉丝",
+          "scoring": {
+            "conceptual_understanding": 1
+          }
+        },
+        {
+          "id": "A003_D",
+          "text": "谁的文化品味不同",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "conceptual_understanding"
+      }
+    },
+    {
+      "id": "A004",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "conceptual_understanding",
+      "subDimension": "剩余价值",
+      "prompt": "在马克思主义政治经济学中，剩余价值讨论主要针对什么问题？",
+      "scenarioType": "concept",
+      "difficulty": 2,
+      "tags": [
+        "theory",
+        "concept"
+      ],
+      "reverse": false,
+      "familyId": "F-A004",
+      "options": [
+        {
+          "id": "A004_A",
+          "text": "商品是否好看",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        },
+        {
+          "id": "A004_B",
+          "text": "资本主义生产中价值增殖与劳动之间的关系",
+          "scoring": {
+            "conceptual_understanding": 3
+          }
+        },
+        {
+          "id": "A004_C",
+          "text": "国家预算如何编制",
+          "scoring": {
+            "conceptual_understanding": 1
+          }
+        },
+        {
+          "id": "A004_D",
+          "text": "消费者是否理性",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "conceptual_understanding"
+      }
+    },
+    {
+      "id": "A005",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "conceptual_understanding",
+      "subDimension": "商品拜物教",
+      "prompt": "“商品拜物教”更接近下列哪种理解？",
+      "scenarioType": "concept",
+      "difficulty": 2,
+      "tags": [
+        "theory",
+        "concept"
+      ],
+      "reverse": false,
+      "familyId": "F-A005",
+      "options": [
+        {
+          "id": "A005_A",
+          "text": "人过度喜欢购物",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        },
+        {
+          "id": "A005_B",
+          "text": "人与人的社会关系以物与物的关系形式呈现并被遮蔽",
+          "scoring": {
+            "conceptual_understanding": 3
+          }
+        },
+        {
+          "id": "A005_C",
+          "text": "商品都带有宗教属性",
+          "scoring": {
+            "conceptual_understanding": 1
+          }
+        },
+        {
+          "id": "A005_D",
+          "text": "价格等于价值",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "conceptual_understanding"
+      }
+    },
+    {
+      "id": "A006",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "conceptual_understanding",
+      "subDimension": "异化",
+      "prompt": "在讨论劳动异化时，核心关切更接近什么？",
+      "scenarioType": "concept",
+      "difficulty": 2,
+      "tags": [
+        "theory",
+        "concept"
+      ],
+      "reverse": false,
+      "familyId": "F-A006",
+      "options": [
+        {
+          "id": "A006_A",
+          "text": "工作时间长就是异化",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        },
+        {
+          "id": "A006_B",
+          "text": "劳动者与劳动过程、劳动产品、他人及自身能力之间出现被支配和分离",
+          "scoring": {
+            "conceptual_understanding": 3
+          }
+        },
+        {
+          "id": "A006_C",
+          "text": "所有职业分工都是异化",
+          "scoring": {
+            "conceptual_understanding": 1
+          }
+        },
+        {
+          "id": "A006_D",
+          "text": "不喜欢工作就是异化",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "conceptual_understanding"
+      }
+    },
+    {
+      "id": "A007",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "conceptual_understanding",
+      "subDimension": "国家与制度",
+      "prompt": "分析国家与制度时，较稳妥的方法是什么？",
+      "scenarioType": "concept",
+      "difficulty": 2,
+      "tags": [
+        "theory",
+        "concept"
+      ],
+      "reverse": false,
+      "familyId": "F-A007",
+      "options": [
+        {
+          "id": "A007_A",
+          "text": "把国家视为完全中立的技术机关",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        },
+        {
+          "id": "A007_B",
+          "text": "同时考察国家的相对自主性、社会力量关系与具体制度结构",
+          "scoring": {
+            "conceptual_understanding": 3
+          }
+        },
+        {
+          "id": "A007_C",
+          "text": "把所有政策都还原为个人动机",
+          "scoring": {
+            "conceptual_understanding": 1
+          }
+        },
+        {
+          "id": "A007_D",
+          "text": "认为国家从不发生变化",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "conceptual_understanding"
+      }
+    },
+    {
+      "id": "A008",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "conceptual_understanding",
+      "subDimension": "意识形态",
+      "prompt": "“意识形态”分析较稳妥的做法是？",
+      "scenarioType": "concept",
+      "difficulty": 2,
+      "tags": [
+        "theory",
+        "concept"
+      ],
+      "reverse": false,
+      "familyId": "F-A008",
+      "options": [
+        {
+          "id": "A008_A",
+          "text": "把不同意见都叫洗脑",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        },
+        {
+          "id": "A008_B",
+          "text": "分析观念如何与制度、利益、经验和日常实践相互塑造",
+          "scoring": {
+            "conceptual_understanding": 3
+          }
+        },
+        {
+          "id": "A008_C",
+          "text": "只判断观点真假",
+          "scoring": {
+            "conceptual_understanding": 1
+          }
+        },
+        {
+          "id": "A008_D",
+          "text": "只研究宣传口号",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "conceptual_understanding"
+      }
+    },
+    {
+      "id": "A009",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "conceptual_understanding",
+      "subDimension": "实践",
+      "prompt": "“实践”在理论学习中的意义更接近什么？",
+      "scenarioType": "concept",
+      "difficulty": 2,
+      "tags": [
+        "theory",
+        "concept"
+      ],
+      "reverse": false,
+      "familyId": "F-A009",
+      "options": [
+        {
+          "id": "A009_A",
+          "text": "理论之后的附加环节",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        },
+        {
+          "id": "A009_B",
+          "text": "理论形成、检验、修正与行动之间的循环",
+          "scoring": {
+            "conceptual_understanding": 3
+          }
+        },
+        {
+          "id": "A009_C",
+          "text": "执行既定答案",
+          "scoring": {
+            "conceptual_understanding": 1
+          }
+        },
+        {
+          "id": "A009_D",
+          "text": "只做线下活动",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "conceptual_understanding"
+      }
+    },
+    {
+      "id": "A010",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "conceptual_understanding",
+      "subDimension": "矛盾分析",
+      "prompt": "面对一个同时包含利益、身份、制度和情绪的问题，矛盾分析首先要求什么？",
+      "scenarioType": "concept",
+      "difficulty": 2,
+      "tags": [
+        "theory",
+        "concept"
+      ],
+      "reverse": false,
+      "familyId": "F-A010",
+      "options": [
+        {
+          "id": "A010_A",
+          "text": "迅速找出唯一敌人",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        },
+        {
+          "id": "A010_B",
+          "text": "区分主要与次要矛盾及其在具体条件下的变化",
+          "scoring": {
+            "conceptual_understanding": 3
+          }
+        },
+        {
+          "id": "A010_C",
+          "text": "把所有因素视为同等重要",
+          "scoring": {
+            "conceptual_understanding": 1
+          }
+        },
+        {
+          "id": "A010_D",
+          "text": "只找最激烈的冲突",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "conceptual_understanding"
+      }
+    },
+    {
+      "id": "A011",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "conceptual_understanding",
+      "subDimension": "具体分析",
+      "prompt": "“具体问题具体分析”最不意味着什么？",
+      "scenarioType": "concept",
+      "difficulty": 2,
+      "tags": [
+        "theory",
+        "concept"
+      ],
+      "reverse": false,
+      "familyId": "F-A011",
+      "options": [
+        {
+          "id": "A011_A",
+          "text": "根据条件调整判断",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        },
+        {
+          "id": "A011_B",
+          "text": "调查实际关系和约束",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        },
+        {
+          "id": "A011_C",
+          "text": "拒绝任何一般理论",
+          "scoring": {
+            "conceptual_understanding": 3
+          }
+        },
+        {
+          "id": "A011_D",
+          "text": "避免把抽象结论机械套用",
+          "scoring": {
+            "conceptual_understanding": 1
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "conceptual_understanding"
+      }
+    },
+    {
+      "id": "A012",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "conceptual_understanding",
+      "subDimension": "结构与能动",
+      "prompt": "结构与个人能动性之间更合理的关系是？",
+      "scenarioType": "concept",
+      "difficulty": 2,
+      "tags": [
+        "theory",
+        "concept"
+      ],
+      "reverse": false,
+      "familyId": "F-A012",
+      "options": [
+        {
+          "id": "A012_A",
+          "text": "结构决定一切",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        },
+        {
+          "id": "A012_B",
+          "text": "个人完全自由",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        },
+        {
+          "id": "A012_C",
+          "text": "行动受到结构约束，同时也可能改变结构",
+          "scoring": {
+            "conceptual_understanding": 3
+          }
+        },
+        {
+          "id": "A012_D",
+          "text": "二者互不相关",
+          "scoring": {
+            "conceptual_understanding": 1
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "conceptual_understanding"
+      }
+    },
+    {
+      "id": "A013",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "conceptual_understanding",
+      "subDimension": "代表与需求",
+      "prompt": "在公共行动中，“代表他人”最需要警惕什么？",
+      "scenarioType": "concept",
+      "difficulty": 2,
+      "tags": [
+        "theory",
+        "concept"
+      ],
+      "reverse": false,
+      "familyId": "F-A013",
+      "options": [
+        {
+          "id": "A013_A",
+          "text": "说话不够响亮",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        },
+        {
+          "id": "A013_B",
+          "text": "把自己的判断直接当成他人的真实需要",
+          "scoring": {
+            "conceptual_understanding": 3
+          }
+        },
+        {
+          "id": "A013_C",
+          "text": "材料收集太多",
+          "scoring": {
+            "conceptual_understanding": 1
+          }
+        },
+        {
+          "id": "A013_D",
+          "text": "行动目标太具体",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "conceptual_understanding"
+      }
+    },
+    {
+      "id": "A014",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "conceptual_understanding",
+      "subDimension": "组织与分工",
+      "prompt": "组织分工的合理性主要取决于什么？",
+      "scenarioType": "concept",
+      "difficulty": 2,
+      "tags": [
+        "theory",
+        "concept"
+      ],
+      "reverse": false,
+      "familyId": "F-A014",
+      "options": [
+        {
+          "id": "A014_A",
+          "text": "职位名称是否高级",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        },
+        {
+          "id": "A014_B",
+          "text": "是否能提高协作效率、明确责任并保留反馈纠偏机制",
+          "scoring": {
+            "conceptual_understanding": 3
+          }
+        },
+        {
+          "id": "A014_C",
+          "text": "是否所有人做同样的事",
+          "scoring": {
+            "conceptual_understanding": 1
+          }
+        },
+        {
+          "id": "A014_D",
+          "text": "是否完全服从固定层级",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "conceptual_understanding"
+      }
+    },
+    {
+      "id": "A015",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "conceptual_understanding",
+      "subDimension": "理论与经验",
+      "prompt": "当现实经验与已有理论预期明显不一致时，更好的处理方式是什么？",
+      "scenarioType": "concept",
+      "difficulty": 2,
+      "tags": [
+        "theory",
+        "concept"
+      ],
+      "reverse": false,
+      "familyId": "F-A015",
+      "options": [
+        {
+          "id": "A015_A",
+          "text": "忽略异常经验",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        },
+        {
+          "id": "A015_B",
+          "text": "立刻抛弃全部理论",
+          "scoring": {
+            "conceptual_understanding": 0
+          }
+        },
+        {
+          "id": "A015_C",
+          "text": "检查数据、概念与条件，并允许修正理论解释",
+          "scoring": {
+            "conceptual_understanding": 3
+          }
+        },
+        {
+          "id": "A015_D",
+          "text": "只寻找支持原结论的案例",
+          "scoring": {
+            "conceptual_understanding": 1
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "conceptual_understanding"
+      }
+    },
+    {
+      "id": "A016",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "theory_reality",
+      "subDimension": "调查与证据",
+      "prompt": "你在讨论“某类学生普遍怎样”时，发现大家都在引用身边两三个例子。你会怎么做？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "theory-reality",
+        "analysis"
+      ],
+      "reverse": false,
+      "familyId": "F-A016",
+      "options": [
+        {
+          "id": "A016_A",
+          "text": "继续用这些例子，因为最真实",
+          "scoring": {
+            "theory_reality": 0
+          }
+        },
+        {
+          "id": "A016_B",
+          "text": "先把结论改成假设，再寻找更系统的材料验证",
+          "scoring": {
+            "theory_reality": 3
+          }
+        },
+        {
+          "id": "A016_C",
+          "text": "换几个更支持自己观点的例子",
+          "scoring": {
+            "theory_reality": 1
+          }
+        },
+        {
+          "id": "A016_D",
+          "text": "暂时停止讨论，因为经验问题无法研究",
+          "scoring": {
+            "theory_reality": 1
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "evidence_orientation"
+      }
+    },
+    {
+      "id": "A017",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "theory_reality",
+      "subDimension": "历史具体性",
+      "prompt": "同一个组织规则在两个年代产生了完全不同的效果，你首先会怎么解释？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "theory-reality",
+        "analysis"
+      ],
+      "reverse": false,
+      "familyId": "F-A017",
+      "options": [
+        {
+          "id": "A017_A",
+          "text": "说明规则本身没有意义",
+          "scoring": {
+            "theory_reality": 0
+          }
+        },
+        {
+          "id": "A017_B",
+          "text": "比较两时期的资源、成员结构、外部环境和执行关系",
+          "scoring": {
+            "theory_reality": 3
+          }
+        },
+        {
+          "id": "A017_C",
+          "text": "认为其中一个年代的人更优秀",
+          "scoring": {
+            "theory_reality": 1
+          }
+        },
+        {
+          "id": "A017_D",
+          "text": "只比较领导者性格",
+          "scoring": {
+            "theory_reality": 1
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "historical_specificity"
+      }
+    },
+    {
+      "id": "A018",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "theory_reality",
+      "subDimension": "结构分析",
+      "prompt": "一个团队反复出现“少数人承担大部分工作”的现象，最优先应该调查什么？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "theory-reality",
+        "analysis"
+      ],
+      "reverse": false,
+      "familyId": "F-A018",
+      "options": [
+        {
+          "id": "A018_A",
+          "text": "谁最懒",
+          "scoring": {
+            "theory_reality": 0
+          }
+        },
+        {
+          "id": "A018_B",
+          "text": "任务分配、能力差异、激励、信息流与退出成本",
+          "scoring": {
+            "theory_reality": 3
+          }
+        },
+        {
+          "id": "A018_C",
+          "text": "谁最有责任心",
+          "scoring": {
+            "theory_reality": 1
+          }
+        },
+        {
+          "id": "A018_D",
+          "text": "先增加惩罚",
+          "scoring": {
+            "theory_reality": 1
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "structural_analysis"
+      }
+    },
+    {
+      "id": "A019",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "theory_reality",
+      "subDimension": "反教条",
+      "prompt": "有人引用一句经典论述直接结束争论，你更倾向于？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "theory-reality",
+        "analysis"
+      ],
+      "reverse": false,
+      "familyId": "F-A019",
+      "options": [
+        {
+          "id": "A019_A",
+          "text": "经典既然说过，就不必讨论",
+          "scoring": {
+            "theory_reality": 0
+          }
+        },
+        {
+          "id": "A019_B",
+          "text": "先确认原文语境，再看它是否适用于当前条件",
+          "scoring": {
+            "theory_reality": 3
+          }
+        },
+        {
+          "id": "A019_C",
+          "text": "经典理论全部过时",
+          "scoring": {
+            "theory_reality": 1
+          }
+        },
+        {
+          "id": "A019_D",
+          "text": "只比较谁引用得多",
+          "scoring": {
+            "theory_reality": 1
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "anti_dogmatism"
+      }
+    },
+    {
+      "id": "A020",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "theory_reality",
+      "subDimension": "结构与行动",
+      "prompt": "一个成员长期无法按时完成任务，你会如何分析？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "theory-reality",
+        "analysis"
+      ],
+      "reverse": false,
+      "familyId": "F-A020",
+      "options": [
+        {
+          "id": "A020_A",
+          "text": "这就是个人品德问题",
+          "scoring": {
+            "theory_reality": 0
+          }
+        },
+        {
+          "id": "A020_B",
+          "text": "先看个人能力与承诺，也检查任务设计、资源和协调机制",
+          "scoring": {
+            "theory_reality": 3
+          }
+        },
+        {
+          "id": "A020_C",
+          "text": "完全是组织问题",
+          "scoring": {
+            "theory_reality": 1
+          }
+        },
+        {
+          "id": "A020_D",
+          "text": "只要换人即可，不必分析",
+          "scoring": {
+            "theory_reality": 1
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "agency_structure_balance"
+      }
+    },
+    {
+      "id": "A021",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "theory_reality",
+      "subDimension": "经验验证",
+      "prompt": "你很认同某个关于青年群体的判断，但第一次访谈结果与它相反。你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "theory-reality",
+        "analysis"
+      ],
+      "reverse": false,
+      "familyId": "F-A021",
+      "options": [
+        {
+          "id": "A021_A",
+          "text": "删除这份访谈",
+          "scoring": {
+            "theory_reality": 0
+          }
+        },
+        {
+          "id": "A021_B",
+          "text": "把它标记为异常材料并继续扩大调查，同时检查原假设",
+          "scoring": {
+            "theory_reality": 3
+          }
+        },
+        {
+          "id": "A021_C",
+          "text": "判断受访者没有觉悟",
+          "scoring": {
+            "theory_reality": 1
+          }
+        },
+        {
+          "id": "A021_D",
+          "text": "立刻宣布原理论错误",
+          "scoring": {
+            "theory_reality": 1
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "empirical_discipline"
+      }
+    },
+    {
+      "id": "A022",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "theory_reality",
+      "subDimension": "系统思维",
+      "prompt": "某项新制度实行后，一个问题减少了，但另一个意外问题上升。你最倾向于？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "theory-reality",
+        "analysis"
+      ],
+      "reverse": false,
+      "familyId": "F-A022",
+      "options": [
+        {
+          "id": "A022_A",
+          "text": "只汇报减少的部分",
+          "scoring": {
+            "theory_reality": 0
+          }
+        },
+        {
+          "id": "A022_B",
+          "text": "把新问题视为系统反馈，重新检查激励与副作用",
+          "scoring": {
+            "theory_reality": 3
+          }
+        },
+        {
+          "id": "A022_C",
+          "text": "认定制度失败并立即取消",
+          "scoring": {
+            "theory_reality": 1
+          }
+        },
+        {
+          "id": "A022_D",
+          "text": "认为意外结果无法分析",
+          "scoring": {
+            "theory_reality": 1
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "systems_thinking"
+      }
+    },
+    {
+      "id": "A023",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "theory_reality",
+      "subDimension": "因果谨慎",
+      "prompt": "一个活动后成员积极性明显提高，最谨慎的结论是？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "theory-reality",
+        "analysis"
+      ],
+      "reverse": false,
+      "familyId": "F-A023",
+      "options": [
+        {
+          "id": "A023_A",
+          "text": "活动必然导致积极性提高",
+          "scoring": {
+            "theory_reality": 0
+          }
+        },
+        {
+          "id": "A023_B",
+          "text": "活动可能有关，但还要排除同期变化和选择效应",
+          "scoring": {
+            "theory_reality": 3
+          }
+        },
+        {
+          "id": "A023_C",
+          "text": "两者完全无关",
+          "scoring": {
+            "theory_reality": 1
+          }
+        },
+        {
+          "id": "A023_D",
+          "text": "只要统计上升就证明因果",
+          "scoring": {
+            "theory_reality": 1
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "causal_humility"
+      }
+    },
+    {
+      "id": "A024",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "theory_reality",
+      "subDimension": "需求识别",
+      "prompt": "你准备替一群同学设计帮助方案，但他们自己提出的需求与你的预想不同。你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "theory-reality",
+        "analysis"
+      ],
+      "reverse": false,
+      "familyId": "F-A024",
+      "options": [
+        {
+          "id": "A024_A",
+          "text": "坚持原方案，因为你更懂结构问题",
+          "scoring": {
+            "theory_reality": 0
+          }
+        },
+        {
+          "id": "A024_B",
+          "text": "先理解他们的表达，再区分即时需求、结构约束与可行动部分",
+          "scoring": {
+            "theory_reality": 3
+          }
+        },
+        {
+          "id": "A024_C",
+          "text": "完全照单全收，不做判断",
+          "scoring": {
+            "theory_reality": 1
+          }
+        },
+        {
+          "id": "A024_D",
+          "text": "取消项目",
+          "scoring": {
+            "theory_reality": 1
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "stakeholder_listening"
+      }
+    },
+    {
+      "id": "A025",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "theory_reality",
+      "subDimension": "主要矛盾",
+      "prompt": "一个项目同时遇到资金不足、分工混乱、内部争论和时间紧张。你更倾向于？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "theory-reality",
+        "analysis"
+      ],
+      "reverse": false,
+      "familyId": "F-A025",
+      "options": [
+        {
+          "id": "A025_A",
+          "text": "四个问题一起平均用力",
+          "scoring": {
+            "theory_reality": 0
+          }
+        },
+        {
+          "id": "A025_B",
+          "text": "判断哪个问题最直接阻断当前目标，并动态调整优先级",
+          "scoring": {
+            "theory_reality": 3
+          }
+        },
+        {
+          "id": "A025_C",
+          "text": "先解决最容易的问题",
+          "scoring": {
+            "theory_reality": 1
+          }
+        },
+        {
+          "id": "A025_D",
+          "text": "先解决争论，因为争论最明显",
+          "scoring": {
+            "theory_reality": 1
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "priority_analysis"
+      }
+    },
+    {
+      "id": "A026",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "theory_reality",
+      "subDimension": "自我纠偏",
+      "prompt": "你推动的方案执行两周后效果不好，但团队投入已经很多。你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "theory-reality",
+        "analysis"
+      ],
+      "reverse": false,
+      "familyId": "F-A026",
+      "options": [
+        {
+          "id": "A026_A",
+          "text": "继续推进，避免承认错误",
+          "scoring": {
+            "theory_reality": 0
+          }
+        },
+        {
+          "id": "A026_B",
+          "text": "保留已有成果，复盘假设与数据，必要时调整或停止",
+          "scoring": {
+            "theory_reality": 3
+          }
+        },
+        {
+          "id": "A026_C",
+          "text": "把责任归给执行者",
+          "scoring": {
+            "theory_reality": 1
+          }
+        },
+        {
+          "id": "A026_D",
+          "text": "立即全部推翻，不做复盘",
+          "scoring": {
+            "theory_reality": 1
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "self_correction",
+        "consistencyGroups": [
+          "CG05"
+        ]
+      }
+    },
+    {
+      "id": "A027",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "theory_reality",
+      "subDimension": "理论迁移",
+      "prompt": "一个在大型组织有效的协作制度准备移植到五人小组，你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "theory-reality",
+        "analysis"
+      ],
+      "reverse": false,
+      "familyId": "F-A027",
+      "options": [
+        {
+          "id": "A027_A",
+          "text": "直接照搬成熟方案",
+          "scoring": {
+            "theory_reality": 0
+          }
+        },
+        {
+          "id": "A027_B",
+          "text": "识别它依赖的规模、权限和沟通条件，再做最小化改造",
+          "scoring": {
+            "theory_reality": 3
+          }
+        },
+        {
+          "id": "A027_C",
+          "text": "小组织不需要制度",
+          "scoring": {
+            "theory_reality": 1
+          }
+        },
+        {
+          "id": "A027_D",
+          "text": "只改名称，不改机制",
+          "scoring": {
+            "theory_reality": 1
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "context_transfer"
+      }
+    },
+    {
+      "id": "A028",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "theory_reality",
+      "subDimension": "多层分析",
+      "prompt": "解释一次线下活动参与率下降，你更愿意同时看哪些层次？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "theory-reality",
+        "analysis"
+      ],
+      "reverse": false,
+      "familyId": "F-A028",
+      "options": [
+        {
+          "id": "A028_A",
+          "text": "只看参与者个人态度",
+          "scoring": {
+            "theory_reality": 0
+          }
+        },
+        {
+          "id": "A028_B",
+          "text": "个人时间、团队组织、学校制度和外部环境",
+          "scoring": {
+            "theory_reality": 3
+          }
+        },
+        {
+          "id": "A028_C",
+          "text": "只看宣传文案",
+          "scoring": {
+            "theory_reality": 1
+          }
+        },
+        {
+          "id": "A028_D",
+          "text": "只看负责人的能力",
+          "scoring": {
+            "theory_reality": 1
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "multi_level_analysis"
+      }
+    },
+    {
+      "id": "A029",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "theory_reality",
+      "subDimension": "不确定性",
+      "prompt": "材料不足，但必须在今晚作出一个可逆的决定。你更倾向于？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "theory-reality",
+        "analysis"
+      ],
+      "reverse": false,
+      "familyId": "F-A029",
+      "options": [
+        {
+          "id": "A029_A",
+          "text": "假装信息已经充分",
+          "scoring": {
+            "theory_reality": 0
+          }
+        },
+        {
+          "id": "A029_B",
+          "text": "说明不确定性，选成本可控的临时方案并设置复查点",
+          "scoring": {
+            "theory_reality": 3
+          }
+        },
+        {
+          "id": "A029_C",
+          "text": "拒绝任何决定",
+          "scoring": {
+            "theory_reality": 1
+          }
+        },
+        {
+          "id": "A029_D",
+          "text": "凭直觉永久定案",
+          "scoring": {
+            "theory_reality": 1
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "uncertainty_handling"
+      }
+    },
+    {
+      "id": "A030",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "theory_reality",
+      "subDimension": "机制解释",
+      "prompt": "发现“加入某社群的人更愿意参与公益活动”，更好的下一步是？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "theory-reality",
+        "analysis"
+      ],
+      "reverse": false,
+      "familyId": "F-A030",
+      "options": [
+        {
+          "id": "A030_A",
+          "text": "直接说社群让人变得更有公益心",
+          "scoring": {
+            "theory_reality": 0
+          }
+        },
+        {
+          "id": "A030_B",
+          "text": "区分自我选择与社群影响，并寻找具体作用机制",
+          "scoring": {
+            "theory_reality": 3
+          }
+        },
+        {
+          "id": "A030_C",
+          "text": "只比较人数",
+          "scoring": {
+            "theory_reality": 1
+          }
+        },
+        {
+          "id": "A030_D",
+          "text": "不需要进一步研究",
+          "scoring": {
+            "theory_reality": 1
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "mechanism_reasoning"
+      }
+    },
+    {
+      "id": "A031",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "organizational_judgment",
+      "subDimension": "集体责任",
+      "prompt": "一次共同任务出了问题，责任横跨多人。最好的第一步更接近？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "practice",
+        "organization"
+      ],
+      "reverse": false,
+      "familyId": "F-A031",
+      "options": [
+        {
+          "id": "A031_A",
+          "text": "先找一个人承担责任",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A031_B",
+          "text": "先还原分工与决策链，再明确各自责任和修复动作",
+          "scoring": {
+            "organizational_judgment": 3
+          }
+        },
+        {
+          "id": "A031_C",
+          "text": "为了团结不追责",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A031_D",
+          "text": "由负责人全部承担",
+          "scoring": {
+            "organizational_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "collective_responsibility"
+      }
+    },
+    {
+      "id": "A032",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "organizational_judgment",
+      "subDimension": "分工",
+      "prompt": "成员能力差异较大时，你更赞成？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "practice",
+        "organization"
+      ],
+      "reverse": false,
+      "familyId": "F-A032",
+      "options": [
+        {
+          "id": "A032_A",
+          "text": "所有人承担完全相同任务",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A032_B",
+          "text": "根据能力分工，同时保留轮换、学习与透明度",
+          "scoring": {
+            "organizational_judgment": 3
+          }
+        },
+        {
+          "id": "A032_C",
+          "text": "能力强的人长期包办",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A032_D",
+          "text": "能力弱的人只做杂事",
+          "scoring": {
+            "organizational_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "division_of_labor"
+      }
+    },
+    {
+      "id": "A033",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "organizational_judgment",
+      "subDimension": "反馈机制",
+      "prompt": "团队内部有人长期不敢指出问题，你认为优先应改什么？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "practice",
+        "organization"
+      ],
+      "reverse": false,
+      "familyId": "F-A033",
+      "options": [
+        {
+          "id": "A033_A",
+          "text": "要求大家更勇敢",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A033_B",
+          "text": "建立低成本反馈渠道，并确保提出问题不会遭到报复",
+          "scoring": {
+            "organizational_judgment": 3
+          }
+        },
+        {
+          "id": "A033_C",
+          "text": "减少讨论，避免冲突",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A033_D",
+          "text": "只允许负责人提问题",
+          "scoring": {
+            "organizational_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "feedback_culture"
+      }
+    },
+    {
+      "id": "A034",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "organizational_judgment",
+      "subDimension": "任务纪律",
+      "prompt": "你认可的一项活动临时需要加班，但成员第二天都有课。你更倾向于？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "practice",
+        "organization"
+      ],
+      "reverse": false,
+      "familyId": "F-A034",
+      "options": [
+        {
+          "id": "A034_A",
+          "text": "既然重要，就要求所有人熬夜",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A034_B",
+          "text": "按必要性分级任务、压缩范围并轮换承担",
+          "scoring": {
+            "organizational_judgment": 3
+          }
+        },
+        {
+          "id": "A034_C",
+          "text": "直接取消所有任务",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A034_D",
+          "text": "让最负责的人解决",
+          "scoring": {
+            "organizational_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "task_discipline"
+      }
+    },
+    {
+      "id": "A035",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "organizational_judgment",
+      "subDimension": "公共利益",
+      "prompt": "团队获得一笔有限资源，分配时最重要的原则更接近？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "practice",
+        "organization"
+      ],
+      "reverse": false,
+      "familyId": "F-A035",
+      "options": [
+        {
+          "id": "A035_A",
+          "text": "谁资历深谁优先",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A035_B",
+          "text": "根据任务需要、透明规则和可解释标准分配",
+          "scoring": {
+            "organizational_judgment": 3
+          }
+        },
+        {
+          "id": "A035_C",
+          "text": "平均分就一定公平",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A035_D",
+          "text": "由负责人自由决定",
+          "scoring": {
+            "organizational_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "public_interest"
+      }
+    },
+    {
+      "id": "A036",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "organizational_judgment",
+      "subDimension": "可问责",
+      "prompt": "你负责的部分出现明显错误，且别人暂时没有发现。你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "practice",
+        "organization"
+      ],
+      "reverse": false,
+      "familyId": "F-A036",
+      "options": [
+        {
+          "id": "A036_A",
+          "text": "等别人发现再说",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A036_B",
+          "text": "主动说明错误、影响和修复计划",
+          "scoring": {
+            "organizational_judgment": 3
+          }
+        },
+        {
+          "id": "A036_C",
+          "text": "偷偷修好，不留下记录",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A036_D",
+          "text": "强调这是集体责任",
+          "scoring": {
+            "organizational_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "accountability"
+      }
+    },
+    {
+      "id": "A037",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "organizational_judgment",
+      "subDimension": "能力建设",
+      "prompt": "团队里只有一个人会某项关键技术，最稳妥的长期做法是？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "practice",
+        "organization"
+      ],
+      "reverse": false,
+      "familyId": "F-A037",
+      "options": [
+        {
+          "id": "A037_A",
+          "text": "继续让他全部负责",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A037_B",
+          "text": "让其负责关键部分，同时形成文档、备份和至少一名替补",
+          "scoring": {
+            "organizational_judgment": 3
+          }
+        },
+        {
+          "id": "A037_C",
+          "text": "换掉这项技术",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A037_D",
+          "text": "要求所有人立刻学会",
+          "scoring": {
+            "organizational_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "capacity_building"
+      }
+    },
+    {
+      "id": "A038",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "organizational_judgment",
+      "subDimension": "过程透明",
+      "prompt": "团队决策速度很快，但成员常常不知道为什么这样决定。你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "practice",
+        "organization"
+      ],
+      "reverse": false,
+      "familyId": "F-A038",
+      "options": [
+        {
+          "id": "A038_A",
+          "text": "效率最重要，不必解释",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A038_B",
+          "text": "保留简短决策记录：问题、依据、负责人、复查条件",
+          "scoring": {
+            "organizational_judgment": 3
+          }
+        },
+        {
+          "id": "A038_C",
+          "text": "所有决定都必须全员长会讨论",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A038_D",
+          "text": "让成员自行猜测背景",
+          "scoring": {
+            "organizational_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "process_transparency"
+      }
+    },
+    {
+      "id": "A039",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "organizational_judgment",
+      "subDimension": "少数意见",
+      "prompt": "多数人支持一个方案，只有一人提出具体风险。你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "practice",
+        "organization"
+      ],
+      "reverse": false,
+      "familyId": "F-A039",
+      "options": [
+        {
+          "id": "A039_A",
+          "text": "少数服从多数，直接结束",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A039_B",
+          "text": "要求其说明证据和风险，再决定是否设置防护或试点",
+          "scoring": {
+            "organizational_judgment": 3
+          }
+        },
+        {
+          "id": "A039_C",
+          "text": "因为是少数意见所以优先采用",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A039_D",
+          "text": "推迟所有决定",
+          "scoring": {
+            "organizational_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "minority_voice",
+        "consistencyGroups": [
+          "CG08"
+        ]
+      }
+    },
+    {
+      "id": "A040",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "organizational_judgment",
+      "subDimension": "利益冲突",
+      "prompt": "负责人同时参与资源分配，又与某候选人关系很好。更合理的做法是？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "practice",
+        "organization"
+      ],
+      "reverse": false,
+      "familyId": "F-A040",
+      "options": [
+        {
+          "id": "A040_A",
+          "text": "相信负责人个人品德",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A040_B",
+          "text": "公开关系并引入回避或共同复核",
+          "scoring": {
+            "organizational_judgment": 3
+          }
+        },
+        {
+          "id": "A040_C",
+          "text": "只要结果看起来合理即可",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A040_D",
+          "text": "禁止负责人认识任何候选人",
+          "scoring": {
+            "organizational_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "conflict_of_interest"
+      }
+    },
+    {
+      "id": "A041",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "organizational_judgment",
+      "subDimension": "隐私边界",
+      "prompt": "为了更了解新成员，有人建议收集其私人聊天记录。你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "practice",
+        "organization"
+      ],
+      "reverse": false,
+      "familyId": "F-A041",
+      "options": [
+        {
+          "id": "A041_A",
+          "text": "只要目的正确就可以",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A041_B",
+          "text": "拒绝不必要的私人信息收集，只保留与协作直接相关且自愿提供的信息",
+          "scoring": {
+            "organizational_judgment": 3
+          }
+        },
+        {
+          "id": "A041_C",
+          "text": "可以匿名收集全部内容",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A041_D",
+          "text": "交给AI自动判断就没有隐私问题",
+          "scoring": {
+            "organizational_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "privacy_boundary",
+        "consistencyGroups": [
+          "CG07"
+        ]
+      }
+    },
+    {
+      "id": "A042",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "organizational_judgment",
+      "subDimension": "可持续协作",
+      "prompt": "一个核心成员长期高负荷承担工作但从不抱怨。团队更应该？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "practice",
+        "organization"
+      ],
+      "reverse": false,
+      "familyId": "F-A042",
+      "options": [
+        {
+          "id": "A042_A",
+          "text": "说明他最可靠，继续交给他",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A042_B",
+          "text": "主动检查负荷、建立轮换和备份，避免单点依赖",
+          "scoring": {
+            "organizational_judgment": 3
+          }
+        },
+        {
+          "id": "A042_C",
+          "text": "等他提出退出再调整",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A042_D",
+          "text": "给他更多头衔",
+          "scoring": {
+            "organizational_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "sustainability"
+      }
+    },
+    {
+      "id": "A043",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "organizational_judgment",
+      "subDimension": "程序公平",
+      "prompt": "时间紧急时，是否可以绕过既定流程？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "practice",
+        "organization"
+      ],
+      "reverse": false,
+      "familyId": "F-A043",
+      "options": [
+        {
+          "id": "A043_A",
+          "text": "任何时候都不可以",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A043_B",
+          "text": "必要时可以，但应记录原因、限定范围并事后复盘",
+          "scoring": {
+            "organizational_judgment": 3
+          }
+        },
+        {
+          "id": "A043_C",
+          "text": "只要负责人同意就可以",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A043_D",
+          "text": "只要结果好就不必解释",
+          "scoring": {
+            "organizational_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "procedural_fairness"
+      }
+    },
+    {
+      "id": "A044",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "organizational_judgment",
+      "subDimension": "组织学习",
+      "prompt": "项目成功后最值得做什么？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "practice",
+        "organization"
+      ],
+      "reverse": false,
+      "familyId": "F-A044",
+      "options": [
+        {
+          "id": "A044_A",
+          "text": "庆祝即可，不必复盘",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A044_B",
+          "text": "复盘哪些机制有效、哪些只是偶然，并沉淀可复用经验",
+          "scoring": {
+            "organizational_judgment": 3
+          }
+        },
+        {
+          "id": "A044_C",
+          "text": "立即复制到所有场景",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A044_D",
+          "text": "把成功归功于最核心的人",
+          "scoring": {
+            "organizational_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "learning_orientation"
+      }
+    },
+    {
+      "id": "A045",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "organizational_judgment",
+      "subDimension": "退出权",
+      "prompt": "成员因为个人原因希望退出长期项目，团队更合适的做法是？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "practice",
+        "organization"
+      ],
+      "reverse": false,
+      "familyId": "F-A045",
+      "options": [
+        {
+          "id": "A045_A",
+          "text": "强调承诺，尽量阻止退出",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A045_B",
+          "text": "确认交接责任，同时尊重其退出并降低不必要的人情压力",
+          "scoring": {
+            "organizational_judgment": 3
+          }
+        },
+        {
+          "id": "A045_C",
+          "text": "立即切断所有联系",
+          "scoring": {
+            "organizational_judgment": 1
+          }
+        },
+        {
+          "id": "A045_D",
+          "text": "要求公开详细私人原因",
+          "scoring": {
+            "organizational_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "exit_respect"
+      }
+    },
+    {
+      "id": "A046",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "reflexive_judgment",
+      "subDimension": "原则与策略",
+      "prompt": "你认同目标，但发现现有执行方式正在激化不必要冲突。你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "reflection",
+        "judgment"
+      ],
+      "reverse": false,
+      "familyId": "F-A046",
+      "options": [
+        {
+          "id": "A046_A",
+          "text": "目标正确，所以方式无需调整",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A046_B",
+          "text": "区分目标与手段，保留原则同时修改策略",
+          "scoring": {
+            "reflexive_judgment": 3
+          }
+        },
+        {
+          "id": "A046_C",
+          "text": "为了避免冲突放弃目标",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A046_D",
+          "text": "先责怪反对者",
+          "scoring": {
+            "reflexive_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "principle_tactics"
+      }
+    },
+    {
+      "id": "A047",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "reflexive_judgment",
+      "subDimension": "来源审查",
+      "prompt": "看到一条高度符合你立场的爆料，但来源模糊。你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "reflection",
+        "judgment"
+      ],
+      "reverse": false,
+      "familyId": "F-A047",
+      "options": [
+        {
+          "id": "A047_A",
+          "text": "先转发，因为大概率是真的",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A047_B",
+          "text": "暂停传播，核查来源、原始材料和独立证据",
+          "scoring": {
+            "reflexive_judgment": 3
+          }
+        },
+        {
+          "id": "A047_C",
+          "text": "只要很多人转就可信",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A047_D",
+          "text": "所有网络材料都不可信",
+          "scoring": {
+            "reflexive_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "source_critique"
+      }
+    },
+    {
+      "id": "A048",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "reflexive_judgment",
+      "subDimension": "理解异议",
+      "prompt": "面对与你结论相反但论证完整的人，你更倾向于？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "reflection",
+        "judgment"
+      ],
+      "reverse": false,
+      "familyId": "F-A048",
+      "options": [
+        {
+          "id": "A048_A",
+          "text": "先判断其立场动机",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A048_B",
+          "text": "先用你认为最强的版本重述其论点，再指出分歧",
+          "scoring": {
+            "reflexive_judgment": 3
+          }
+        },
+        {
+          "id": "A048_C",
+          "text": "避免讨论",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A048_D",
+          "text": "寻找其个人经历中的弱点",
+          "scoring": {
+            "reflexive_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "opponent_charity"
+      }
+    },
+    {
+      "id": "A049",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "reflexive_judgment",
+      "subDimension": "论证质量",
+      "prompt": "两个人结论一致，但一个只喊口号，一个给出机制、证据和条件。你更看重？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "reflection",
+        "judgment"
+      ],
+      "reverse": false,
+      "familyId": "F-A049",
+      "options": [
+        {
+          "id": "A049_A",
+          "text": "结论一致即可",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A049_B",
+          "text": "能说明机制、证据和适用条件的论证",
+          "scoring": {
+            "reflexive_judgment": 3
+          }
+        },
+        {
+          "id": "A049_C",
+          "text": "表达更激烈的人",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A049_D",
+          "text": "资历更深的人",
+          "scoring": {
+            "reflexive_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "argument_quality"
+      }
+    },
+    {
+      "id": "A050",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "reflexive_judgment",
+      "subDimension": "承认错误",
+      "prompt": "你公开表达过一个后来被证据否定的判断。你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "reflection",
+        "judgment"
+      ],
+      "reverse": false,
+      "familyId": "F-A050",
+      "options": [
+        {
+          "id": "A050_A",
+          "text": "删除旧内容，不解释",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A050_B",
+          "text": "公开更正，并说明原判断哪里出了问题",
+          "scoring": {
+            "reflexive_judgment": 3
+          }
+        },
+        {
+          "id": "A050_C",
+          "text": "寻找新的证据继续证明原结论",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A050_D",
+          "text": "以后避免表达判断",
+          "scoring": {
+            "reflexive_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "error_ownership"
+      }
+    },
+    {
+      "id": "A051",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "reflexive_judgment",
+      "subDimension": "结论边界",
+      "prompt": "你只调查了一个学校的十位学生。最合适的写法是？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "reflection",
+        "judgment"
+      ],
+      "reverse": false,
+      "familyId": "F-A051",
+      "options": [
+        {
+          "id": "A051_A",
+          "text": "当代大学生普遍认为……",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A051_B",
+          "text": "在本次小样本访谈中观察到……，尚不能外推到更大群体",
+          "scoring": {
+            "reflexive_judgment": 3
+          }
+        },
+        {
+          "id": "A051_C",
+          "text": "青年人都认为……",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A051_D",
+          "text": "样本小，所以材料完全无价值",
+          "scoring": {
+            "reflexive_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "scope_control"
+      }
+    },
+    {
+      "id": "A052",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "reflexive_judgment",
+      "subDimension": "权力敏感",
+      "prompt": "新人面对核心成员时从不提出反对意见。你最应该警惕？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "reflection",
+        "judgment"
+      ],
+      "reverse": false,
+      "familyId": "F-A052",
+      "options": [
+        {
+          "id": "A052_A",
+          "text": "新人缺乏勇气",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A052_B",
+          "text": "地位差异可能让真实反馈难以表达",
+          "scoring": {
+            "reflexive_judgment": 3
+          }
+        },
+        {
+          "id": "A052_C",
+          "text": "新人一定没有意见",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A052_D",
+          "text": "核心成员能力更强，所以正常",
+          "scoring": {
+            "reflexive_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "power_awareness"
+      }
+    },
+    {
+      "id": "A053",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "reflexive_judgment",
+      "subDimension": "目的与手段",
+      "prompt": "为了一个你认可的公共目标，是否可以长期使用你自己也认为不透明的手段？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "reflection",
+        "judgment"
+      ],
+      "reverse": false,
+      "familyId": "F-A053",
+      "options": [
+        {
+          "id": "A053_A",
+          "text": "只要目标正确就可以",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A053_B",
+          "text": "需要评估必要性、比例性、透明度与长期制度后果",
+          "scoring": {
+            "reflexive_judgment": 3
+          }
+        },
+        {
+          "id": "A053_C",
+          "text": "任何保密都不可以",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A053_D",
+          "text": "只要短期有效就可以",
+          "scoring": {
+            "reflexive_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "means_end_consistency"
+      }
+    },
+    {
+      "id": "A054",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "reflexive_judgment",
+      "subDimension": "内部差异",
+      "prompt": "一个团队在总体目标一致的前提下，对路径有长期分歧。你更倾向于？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "reflection",
+        "judgment"
+      ],
+      "reverse": false,
+      "familyId": "F-A054",
+      "options": [
+        {
+          "id": "A054_A",
+          "text": "尽快消除所有差异",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A054_B",
+          "text": "明确共同底线，允许可管理分歧并用实践结果继续比较",
+          "scoring": {
+            "reflexive_judgment": 3
+          }
+        },
+        {
+          "id": "A054_C",
+          "text": "完全不需要共同规则",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A054_D",
+          "text": "按资历决定正确路径",
+          "scoring": {
+            "reflexive_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "pluralism",
+        "consistencyGroups": [
+          "CG08"
+        ]
+      }
+    },
+    {
+      "id": "A055",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "reflexive_judgment",
+      "subDimension": "紧迫感管理",
+      "prompt": "有人以“现在非常紧急”为理由要求立刻接受一个高风险方案。你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "reflection",
+        "judgment"
+      ],
+      "reverse": false,
+      "familyId": "F-A055",
+      "options": [
+        {
+          "id": "A055_A",
+          "text": "越紧急越应立即执行",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A055_B",
+          "text": "要求说明紧急性的证据，并优先选择可逆、可监测方案",
+          "scoring": {
+            "reflexive_judgment": 3
+          }
+        },
+        {
+          "id": "A055_C",
+          "text": "任何紧急决策都拒绝",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A055_D",
+          "text": "让最有威望的人决定",
+          "scoring": {
+            "reflexive_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "urgency_resistance"
+      }
+    },
+    {
+      "id": "A056",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "reflexive_judgment",
+      "subDimension": "边界意识",
+      "prompt": "团队希望成员“为了共同目标”长期牺牲个人生活，你更认同？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "reflection",
+        "judgment"
+      ],
+      "reverse": false,
+      "familyId": "F-A056",
+      "options": [
+        {
+          "id": "A056_A",
+          "text": "真正认同目标的人应该接受",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A056_B",
+          "text": "短期特殊时期可以协商，但长期需要明确边界和可持续机制",
+          "scoring": {
+            "reflexive_judgment": 3
+          }
+        },
+        {
+          "id": "A056_C",
+          "text": "个人生活永远优先于任何共同任务",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A056_D",
+          "text": "由负责人决定什么算合理牺牲",
+          "scoring": {
+            "reflexive_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "boundary_setting"
+      }
+    },
+    {
+      "id": "A057",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "reflexive_judgment",
+      "subDimension": "去个人化",
+      "prompt": "一个团队高度依赖某位非常有能力的核心人物。你最担心什么？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "reflection",
+        "judgment"
+      ],
+      "reverse": false,
+      "familyId": "F-A057",
+      "options": [
+        {
+          "id": "A057_A",
+          "text": "他不够忙",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A057_B",
+          "text": "知识、决策和关系过度集中导致单点故障与不可纠偏",
+          "scoring": {
+            "reflexive_judgment": 3
+          }
+        },
+        {
+          "id": "A057_C",
+          "text": "其他人会嫉妒",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A057_D",
+          "text": "核心人物没有更高头衔",
+          "scoring": {
+            "reflexive_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "anti_personality_cult"
+      }
+    },
+    {
+      "id": "A058",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "reflexive_judgment",
+      "subDimension": "安全与比例",
+      "prompt": "团队担心信息泄露，最合理的做法是？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "reflection",
+        "judgment"
+      ],
+      "reverse": false,
+      "familyId": "F-A058",
+      "options": [
+        {
+          "id": "A058_A",
+          "text": "所有信息都只给核心成员",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A058_B",
+          "text": "按敏感程度和实际需要分级，最小权限并定期复查",
+          "scoring": {
+            "reflexive_judgment": 3
+          }
+        },
+        {
+          "id": "A058_C",
+          "text": "完全公开所有信息",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A058_D",
+          "text": "靠成员自觉，不做规则",
+          "scoring": {
+            "reflexive_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "security_proportionality",
+        "consistencyGroups": [
+          "CG07"
+        ]
+      }
+    },
+    {
+      "id": "A059",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "reflexive_judgment",
+      "subDimension": "失败学习",
+      "prompt": "一次尝试失败后，最没有价值的处理方式是？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "reflection",
+        "judgment"
+      ],
+      "reverse": false,
+      "familyId": "F-A059",
+      "options": [
+        {
+          "id": "A059_A",
+          "text": "复盘假设和执行条件",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A059_B",
+          "text": "区分方向错误与执行错误",
+          "scoring": {
+            "reflexive_judgment": 0
+          }
+        },
+        {
+          "id": "A059_C",
+          "text": "寻找可以复用的失败信息",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A059_D",
+          "text": "为了维持士气，假装没有失败",
+          "scoring": {
+            "reflexive_judgment": 3
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "failure_learning"
+      }
+    },
+    {
+      "id": "A060",
+      "version": 1,
+      "layer": "theory_value",
+      "dimension": "reflexive_judgment",
+      "subDimension": "人机边界",
+      "prompt": "如果系统报告说某人“更适合协调”，但长期合作经验显示并非如此，你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "reflection",
+        "judgment"
+      ],
+      "reverse": false,
+      "familyId": "F-A060",
+      "options": [
+        {
+          "id": "A060_A",
+          "text": "系统更客观，按系统结果处理",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A060_B",
+          "text": "把报告当作一个证据来源，回看题目、情境和现实合作表现",
+          "scoring": {
+            "reflexive_judgment": 3
+          }
+        },
+        {
+          "id": "A060_C",
+          "text": "从此完全不用系统",
+          "scoring": {
+            "reflexive_judgment": 1
+          }
+        },
+        {
+          "id": "A060_D",
+          "text": "重新测试直到出现想要的结果",
+          "scoring": {
+            "reflexive_judgment": 0
+          }
+        }
+      ],
+      "metadata": {
+        "signal": "human_judgment",
+        "consistencyGroups": [
+          "CG06"
+        ]
+      }
+    },
+    {
+      "id": "B001",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "responsibility",
+      "subDimension": "任务责任",
+      "prompt": "你答应周五交一份材料，但周三发现自己大概率完不成。你通常会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B001",
+      "options": [
+        {
+          "id": "B001_A",
+          "text": "先不说，周五再看",
+          "scoring": {
+            "responsibility": 1
+          }
+        },
+        {
+          "id": "B001_B",
+          "text": "尽快说明进度、原因和新的可行时间",
+          "scoring": {
+            "responsibility": 3
+          }
+        },
+        {
+          "id": "B001_C",
+          "text": "临时拼一份质量很差的交上去",
+          "scoring": {
+            "responsibility": 1
+          }
+        },
+        {
+          "id": "B001_D",
+          "text": "让别人替你完成，但不说明",
+          "scoring": {
+            "responsibility": 0
+          }
+        }
+      ],
+      "metadata": {
+        "consistencyGroups": [
+          "CG01"
+        ]
+      }
+    },
+    {
+      "id": "B002",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "responsibility",
+      "subDimension": "任务责任",
+      "prompt": "团队任务分工后，你发现自己的部分比预想简单。你更可能？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B002",
+      "options": [
+        {
+          "id": "B002_A",
+          "text": "完成自己的部分后就结束",
+          "scoring": {
+            "responsibility": 1
+          }
+        },
+        {
+          "id": "B002_B",
+          "text": "按时完成，并主动看是否有关键缺口需要支援",
+          "scoring": {
+            "responsibility": 3
+          }
+        },
+        {
+          "id": "B002_C",
+          "text": "拖到最后再交",
+          "scoring": {
+            "responsibility": 1
+          }
+        },
+        {
+          "id": "B002_D",
+          "text": "要求重新分工，让每个人工作量完全相同",
+          "scoring": {
+            "responsibility": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B003",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "responsibility",
+      "subDimension": "任务责任",
+      "prompt": "项目出了纰漏，其中有一部分与你有关。你通常？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B003",
+      "options": [
+        {
+          "id": "B003_A",
+          "text": "先解释自己不是主要责任人",
+          "scoring": {
+            "responsibility": 1
+          }
+        },
+        {
+          "id": "B003_B",
+          "text": "先说明自己负责部分的问题并处理，再讨论系统原因",
+          "scoring": {
+            "responsibility": 3
+          }
+        },
+        {
+          "id": "B003_C",
+          "text": "等负责人问到再说",
+          "scoring": {
+            "responsibility": 1
+          }
+        },
+        {
+          "id": "B003_D",
+          "text": "认为团队问题无法区分个人责任",
+          "scoring": {
+            "responsibility": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B004",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "responsibility",
+      "subDimension": "任务责任",
+      "prompt": "一项重复而枯燥的工作没人愿意做，但它确实必要。你更可能？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B004",
+      "options": [
+        {
+          "id": "B004_A",
+          "text": "只做有创造性的工作",
+          "scoring": {
+            "responsibility": 1
+          }
+        },
+        {
+          "id": "B004_B",
+          "text": "在合理范围内承担一部分，并推动轮换或自动化",
+          "scoring": {
+            "responsibility": 3
+          }
+        },
+        {
+          "id": "B004_C",
+          "text": "等新人来做",
+          "scoring": {
+            "responsibility": 1
+          }
+        },
+        {
+          "id": "B004_D",
+          "text": "全部自己长期包办",
+          "scoring": {
+            "responsibility": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B005",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "responsibility",
+      "subDimension": "任务责任",
+      "prompt": "你对某项承诺已经失去兴趣，但它还没有完成。你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B005",
+      "options": [
+        {
+          "id": "B005_A",
+          "text": "直接停止，不再回应",
+          "scoring": {
+            "responsibility": 1
+          }
+        },
+        {
+          "id": "B005_B",
+          "text": "完成最低必要交接，说明退出时间和剩余事项",
+          "scoring": {
+            "responsibility": 3
+          }
+        },
+        {
+          "id": "B005_C",
+          "text": "继续拖着，不明确退出",
+          "scoring": {
+            "responsibility": 1
+          }
+        },
+        {
+          "id": "B005_D",
+          "text": "勉强长期坚持，即使严重影响其他生活",
+          "scoring": {
+            "responsibility": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B006",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "responsibility",
+      "subDimension": "任务责任",
+      "prompt": "如果任务没有明确负责人，你通常？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B006",
+      "options": [
+        {
+          "id": "B006_A",
+          "text": "默认这不是我的事",
+          "scoring": {
+            "responsibility": 1
+          }
+        },
+        {
+          "id": "B006_B",
+          "text": "先确认是否重要，必要时推动明确负责人",
+          "scoring": {
+            "responsibility": 3
+          }
+        },
+        {
+          "id": "B006_C",
+          "text": "直接全部接过来",
+          "scoring": {
+            "responsibility": 1
+          }
+        },
+        {
+          "id": "B006_D",
+          "text": "等待别人安排",
+          "scoring": {
+            "responsibility": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B007",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "communication",
+      "subDimension": "沟通",
+      "prompt": "你不同意同伴方案，但时间有限。你通常会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B007",
+      "options": [
+        {
+          "id": "B007_A",
+          "text": "直接说方案不行",
+          "scoring": {
+            "communication": 1
+          }
+        },
+        {
+          "id": "B007_B",
+          "text": "先概括对方目标，再指出关键风险并给替代方案",
+          "scoring": {
+            "communication": 3
+          }
+        },
+        {
+          "id": "B007_C",
+          "text": "先不说，等失败后再证明",
+          "scoring": {
+            "communication": 1
+          }
+        },
+        {
+          "id": "B007_D",
+          "text": "为了和气完全同意",
+          "scoring": {
+            "communication": 0
+          }
+        }
+      ],
+      "metadata": {
+        "consistencyGroups": [
+          "CG02"
+        ]
+      }
+    },
+    {
+      "id": "B008",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "communication",
+      "subDimension": "沟通",
+      "prompt": "别人给你一段很模糊的任务描述。你更可能？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B008",
+      "options": [
+        {
+          "id": "B008_A",
+          "text": "按自己理解做，错了再说",
+          "scoring": {
+            "communication": 1
+          }
+        },
+        {
+          "id": "B008_B",
+          "text": "先确认目标、交付物、截止时间和判断标准",
+          "scoring": {
+            "communication": 3
+          }
+        },
+        {
+          "id": "B008_C",
+          "text": "要求对方写一份特别完整的说明才开始",
+          "scoring": {
+            "communication": 1
+          }
+        },
+        {
+          "id": "B008_D",
+          "text": "暂时不做",
+          "scoring": {
+            "communication": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B009",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "communication",
+      "subDimension": "沟通",
+      "prompt": "线上讨论越来越长，大家开始互相误解。你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B009",
+      "options": [
+        {
+          "id": "B009_A",
+          "text": "继续打字把每个点都说清",
+          "scoring": {
+            "communication": 1
+          }
+        },
+        {
+          "id": "B009_B",
+          "text": "总结争议点，必要时切换语音/线下并形成结论记录",
+          "scoring": {
+            "communication": 3
+          }
+        },
+        {
+          "id": "B009_C",
+          "text": "退出讨论",
+          "scoring": {
+            "communication": 1
+          }
+        },
+        {
+          "id": "B009_D",
+          "text": "让最有经验的人直接定",
+          "scoring": {
+            "communication": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B010",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "communication",
+      "subDimension": "沟通",
+      "prompt": "别人指出你的表达让他感到被冒犯，但你并无此意。你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B010",
+      "options": [
+        {
+          "id": "B010_A",
+          "text": "强调自己没有恶意，所以无需处理",
+          "scoring": {
+            "communication": 1
+          }
+        },
+        {
+          "id": "B010_B",
+          "text": "先确认具体哪里造成问题，澄清意图并调整表达",
+          "scoring": {
+            "communication": 3
+          }
+        },
+        {
+          "id": "B010_C",
+          "text": "以后尽量不表达意见",
+          "scoring": {
+            "communication": 1
+          }
+        },
+        {
+          "id": "B010_D",
+          "text": "认为对方太敏感",
+          "scoring": {
+            "communication": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B011",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "communication",
+      "subDimension": "沟通",
+      "prompt": "你需要向不熟悉专业术语的人解释复杂问题。你更倾向于？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B011",
+      "options": [
+        {
+          "id": "B011_A",
+          "text": "直接使用最严谨术语",
+          "scoring": {
+            "communication": 1
+          }
+        },
+        {
+          "id": "B011_B",
+          "text": "根据对方背景先讲核心关系，再逐步增加术语",
+          "scoring": {
+            "communication": 3
+          }
+        },
+        {
+          "id": "B011_C",
+          "text": "只给结论",
+          "scoring": {
+            "communication": 1
+          }
+        },
+        {
+          "id": "B011_D",
+          "text": "让对方自己去查",
+          "scoring": {
+            "communication": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B012",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "communication",
+      "subDimension": "沟通",
+      "prompt": "会议上你发现大家对同一句话理解不同。你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B012",
+      "options": [
+        {
+          "id": "B012_A",
+          "text": "继续讨论具体方案",
+          "scoring": {
+            "communication": 1
+          }
+        },
+        {
+          "id": "B012_B",
+          "text": "先统一关键概念和任务含义，再继续",
+          "scoring": {
+            "communication": 3
+          }
+        },
+        {
+          "id": "B012_C",
+          "text": "让主持人决定哪种理解正确",
+          "scoring": {
+            "communication": 1
+          }
+        },
+        {
+          "id": "B012_D",
+          "text": "认为这种差异不重要",
+          "scoring": {
+            "communication": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B013",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "conflict_handling",
+      "subDimension": "冲突处理",
+      "prompt": "两位同伴争论越来越激烈，你正好理解双方观点。你更可能？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B013",
+      "options": [
+        {
+          "id": "B013_A",
+          "text": "选一个你更认同的人支持",
+          "scoring": {
+            "conflict_handling": 1
+          }
+        },
+        {
+          "id": "B013_B",
+          "text": "先把分歧拆成事实、目标、方法三类，再推动逐项处理",
+          "scoring": {
+            "conflict_handling": 3
+          }
+        },
+        {
+          "id": "B013_C",
+          "text": "让他们自己吵完",
+          "scoring": {
+            "conflict_handling": 1
+          }
+        },
+        {
+          "id": "B013_D",
+          "text": "要求所有人停止讨论",
+          "scoring": {
+            "conflict_handling": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B014",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "conflict_handling",
+      "subDimension": "冲突处理",
+      "prompt": "别人公开批评了你的工作。你第一反应更接近？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B014",
+      "options": [
+        {
+          "id": "B014_A",
+          "text": "立即反驳",
+          "scoring": {
+            "conflict_handling": 1
+          }
+        },
+        {
+          "id": "B014_B",
+          "text": "先确认批评中具体可验证的部分，再回应",
+          "scoring": {
+            "conflict_handling": 3
+          }
+        },
+        {
+          "id": "B014_C",
+          "text": "以后减少合作",
+          "scoring": {
+            "conflict_handling": 1
+          }
+        },
+        {
+          "id": "B014_D",
+          "text": "全部接受，不解释",
+          "scoring": {
+            "conflict_handling": 0
+          }
+        }
+      ],
+      "metadata": {
+        "consistencyGroups": [
+          "CG02"
+        ]
+      }
+    },
+    {
+      "id": "B015",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "conflict_handling",
+      "subDimension": "冲突处理",
+      "prompt": "你和朋友在任务上意见不一致。你更可能？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B015",
+      "options": [
+        {
+          "id": "B015_A",
+          "text": "因为关系好，尽量不争",
+          "scoring": {
+            "conflict_handling": 1
+          }
+        },
+        {
+          "id": "B015_B",
+          "text": "把关系与任务分开，就事论事并确认共同目标",
+          "scoring": {
+            "conflict_handling": 3
+          }
+        },
+        {
+          "id": "B015_C",
+          "text": "坚持自己的方案以免显得软弱",
+          "scoring": {
+            "conflict_handling": 1
+          }
+        },
+        {
+          "id": "B015_D",
+          "text": "交给第三个人决定",
+          "scoring": {
+            "conflict_handling": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B016",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "conflict_handling",
+      "subDimension": "冲突处理",
+      "prompt": "团队里有人经常打断别人，但他贡献很大。你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B016",
+      "options": [
+        {
+          "id": "B016_A",
+          "text": "贡献大可以接受",
+          "scoring": {
+            "conflict_handling": 1
+          }
+        },
+        {
+          "id": "B016_B",
+          "text": "私下反馈具体行为，并在会议机制上限制打断",
+          "scoring": {
+            "conflict_handling": 3
+          }
+        },
+        {
+          "id": "B016_C",
+          "text": "公开讽刺他",
+          "scoring": {
+            "conflict_handling": 1
+          }
+        },
+        {
+          "id": "B016_D",
+          "text": "减少其他人发言时间",
+          "scoring": {
+            "conflict_handling": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B017",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "conflict_handling",
+      "subDimension": "冲突处理",
+      "prompt": "一次分歧已经影响到个人关系。你更倾向于？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B017",
+      "options": [
+        {
+          "id": "B017_A",
+          "text": "先冷处理直到自然恢复",
+          "scoring": {
+            "conflict_handling": 1
+          }
+        },
+        {
+          "id": "B017_B",
+          "text": "在情绪降低后重新区分事实分歧、感受和后续合作边界",
+          "scoring": {
+            "conflict_handling": 3
+          }
+        },
+        {
+          "id": "B017_C",
+          "text": "谁先道歉谁输",
+          "scoring": {
+            "conflict_handling": 1
+          }
+        },
+        {
+          "id": "B017_D",
+          "text": "永久避免再合作",
+          "scoring": {
+            "conflict_handling": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B018",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "conflict_handling",
+      "subDimension": "冲突处理",
+      "prompt": "如果你发现自己在争论中其实理解错了对方，你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B018",
+      "options": [
+        {
+          "id": "B018_A",
+          "text": "继续完成原来的论证",
+          "scoring": {
+            "conflict_handling": 1
+          }
+        },
+        {
+          "id": "B018_B",
+          "text": "明确承认误解，并基于对方真实观点继续讨论",
+          "scoring": {
+            "conflict_handling": 3
+          }
+        },
+        {
+          "id": "B018_C",
+          "text": "换一个话题",
+          "scoring": {
+            "conflict_handling": 1
+          }
+        },
+        {
+          "id": "B018_D",
+          "text": "说双方都有问题",
+          "scoring": {
+            "conflict_handling": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B019",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "initiative",
+      "subDimension": "主动性",
+      "prompt": "一个项目还没人提出具体计划。你通常？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B019",
+      "options": [
+        {
+          "id": "B019_A",
+          "text": "等负责人安排",
+          "scoring": {
+            "initiative": 1
+          }
+        },
+        {
+          "id": "B019_B",
+          "text": "先整理一个最低可行方案供大家修改",
+          "scoring": {
+            "initiative": 3
+          }
+        },
+        {
+          "id": "B019_C",
+          "text": "直接按自己的方案开始做",
+          "scoring": {
+            "initiative": 1
+          }
+        },
+        {
+          "id": "B019_D",
+          "text": "认为没有计划说明项目不重要",
+          "scoring": {
+            "initiative": 0
+          }
+        }
+      ],
+      "metadata": {
+        "consistencyGroups": [
+          "CG03"
+        ]
+      }
+    },
+    {
+      "id": "B020",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "initiative",
+      "subDimension": "主动性",
+      "prompt": "你发现一个流程每周都在重复浪费时间。你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B020",
+      "options": [
+        {
+          "id": "B020_A",
+          "text": "习惯了就继续",
+          "scoring": {
+            "initiative": 1
+          }
+        },
+        {
+          "id": "B020_B",
+          "text": "记录问题并提出一个低成本改进或自动化方案",
+          "scoring": {
+            "initiative": 3
+          }
+        },
+        {
+          "id": "B020_C",
+          "text": "抱怨流程很差",
+          "scoring": {
+            "initiative": 1
+          }
+        },
+        {
+          "id": "B020_D",
+          "text": "直接改流程，不告诉任何人",
+          "scoring": {
+            "initiative": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B021",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "initiative",
+      "subDimension": "主动性",
+      "prompt": "你完成任务后还有一些时间。你更可能？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B021",
+      "options": [
+        {
+          "id": "B021_A",
+          "text": "保持空闲等待新任务",
+          "scoring": {
+            "initiative": 1
+          }
+        },
+        {
+          "id": "B021_B",
+          "text": "检查依赖项、文档或可能阻塞别人的地方",
+          "scoring": {
+            "initiative": 3
+          }
+        },
+        {
+          "id": "B021_C",
+          "text": "自己开一个新方向，不与团队沟通",
+          "scoring": {
+            "initiative": 1
+          }
+        },
+        {
+          "id": "B021_D",
+          "text": "做与项目无关的事",
+          "scoring": {
+            "initiative": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B022",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "initiative",
+      "subDimension": "主动性",
+      "prompt": "你有一个还不成熟的新想法。你通常？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B022",
+      "options": [
+        {
+          "id": "B022_A",
+          "text": "等完全想清楚再说",
+          "scoring": {
+            "initiative": 1
+          }
+        },
+        {
+          "id": "B022_B",
+          "text": "先写成简短假设和测试方式，邀请低成本反馈",
+          "scoring": {
+            "initiative": 3
+          }
+        },
+        {
+          "id": "B022_C",
+          "text": "立刻要求团队采用",
+          "scoring": {
+            "initiative": 1
+          }
+        },
+        {
+          "id": "B022_D",
+          "text": "不提，以免被否定",
+          "scoring": {
+            "initiative": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B023",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "initiative",
+      "subDimension": "主动性",
+      "prompt": "一个关键问题没人明确负责，但你也不是负责人。你更可能？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B023",
+      "options": [
+        {
+          "id": "B023_A",
+          "text": "不越界",
+          "scoring": {
+            "initiative": 1
+          }
+        },
+        {
+          "id": "B023_B",
+          "text": "提醒相关人并推动明确责任；必要时临时接住",
+          "scoring": {
+            "initiative": 3
+          }
+        },
+        {
+          "id": "B023_C",
+          "text": "永久接管",
+          "scoring": {
+            "initiative": 1
+          }
+        },
+        {
+          "id": "B023_D",
+          "text": "等问题爆发",
+          "scoring": {
+            "initiative": 0
+          }
+        }
+      ],
+      "metadata": {
+        "consistencyGroups": [
+          "CG03"
+        ]
+      }
+    },
+    {
+      "id": "B024",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "initiative",
+      "subDimension": "主动性",
+      "prompt": "你对某项技能不熟，但它会阻碍当前任务。你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B024",
+      "options": [
+        {
+          "id": "B024_A",
+          "text": "换别人做",
+          "scoring": {
+            "initiative": 1
+          }
+        },
+        {
+          "id": "B024_B",
+          "text": "评估学习成本，先补足最低必要能力并寻求支持",
+          "scoring": {
+            "initiative": 3
+          }
+        },
+        {
+          "id": "B024_C",
+          "text": "假装自己会",
+          "scoring": {
+            "initiative": 1
+          }
+        },
+        {
+          "id": "B024_D",
+          "text": "因为不会就暂停项目",
+          "scoring": {
+            "initiative": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B025",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "reliability",
+      "subDimension": "可靠性",
+      "prompt": "你安排了一个重要会议，但当天状态不好。你更可能？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B025",
+      "options": [
+        {
+          "id": "B025_A",
+          "text": "临时消失",
+          "scoring": {
+            "reliability": 1
+          }
+        },
+        {
+          "id": "B025_B",
+          "text": "提前说明并给出改期或替代方案",
+          "scoring": {
+            "reliability": 3
+          }
+        },
+        {
+          "id": "B025_C",
+          "text": "硬撑参加但完全不准备",
+          "scoring": {
+            "reliability": 1
+          }
+        },
+        {
+          "id": "B025_D",
+          "text": "让别人自行决定怎么办",
+          "scoring": {
+            "reliability": 0
+          }
+        }
+      ],
+      "metadata": {
+        "consistencyGroups": [
+          "CG04"
+        ]
+      }
+    },
+    {
+      "id": "B026",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "reliability",
+      "subDimension": "可靠性",
+      "prompt": "别人依赖你的文件才能继续工作，你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B026",
+      "options": [
+        {
+          "id": "B026_A",
+          "text": "做完后有空再发",
+          "scoring": {
+            "reliability": 1
+          }
+        },
+        {
+          "id": "B026_B",
+          "text": "按约定格式和时间交付，并确认对方能打开和使用",
+          "scoring": {
+            "reliability": 3
+          }
+        },
+        {
+          "id": "B026_C",
+          "text": "只发截图",
+          "scoring": {
+            "reliability": 1
+          }
+        },
+        {
+          "id": "B026_D",
+          "text": "让对方来催",
+          "scoring": {
+            "reliability": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B027",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "reliability",
+      "subDimension": "可靠性",
+      "prompt": "任务时间很紧，你发现最初估时明显错误。你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B027",
+      "options": [
+        {
+          "id": "B027_A",
+          "text": "继续按原计划，尽量不暴露问题",
+          "scoring": {
+            "reliability": 1
+          }
+        },
+        {
+          "id": "B027_B",
+          "text": "尽早更新估时并给出缩范围、增资源或延期选项",
+          "scoring": {
+            "reliability": 3
+          }
+        },
+        {
+          "id": "B027_C",
+          "text": "等最后一天再说",
+          "scoring": {
+            "reliability": 1
+          }
+        },
+        {
+          "id": "B027_D",
+          "text": "直接降低质量但不说明",
+          "scoring": {
+            "reliability": 0
+          }
+        }
+      ],
+      "metadata": {
+        "consistencyGroups": [
+          "CG01"
+        ]
+      }
+    },
+    {
+      "id": "B028",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "reliability",
+      "subDimension": "可靠性",
+      "prompt": "你把一项任务交接给别人后，通常？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B028",
+      "options": [
+        {
+          "id": "B028_A",
+          "text": "口头说一下即可",
+          "scoring": {
+            "reliability": 1
+          }
+        },
+        {
+          "id": "B028_B",
+          "text": "说明背景、当前状态、下一步、风险和文件位置",
+          "scoring": {
+            "reliability": 3
+          }
+        },
+        {
+          "id": "B028_C",
+          "text": "把所有历史聊天记录直接转发",
+          "scoring": {
+            "reliability": 1
+          }
+        },
+        {
+          "id": "B028_D",
+          "text": "不交接，让对方自己摸索",
+          "scoring": {
+            "reliability": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B029",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "reliability",
+      "subDimension": "可靠性",
+      "prompt": "你需要处理多个并行任务时，最常用的方式是？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B029",
+      "options": [
+        {
+          "id": "B029_A",
+          "text": "凭记忆",
+          "scoring": {
+            "reliability": 1
+          }
+        },
+        {
+          "id": "B029_B",
+          "text": "明确优先级、截止时间和依赖，定期更新",
+          "scoring": {
+            "reliability": 3
+          }
+        },
+        {
+          "id": "B029_C",
+          "text": "哪个催得急先做哪个",
+          "scoring": {
+            "reliability": 1
+          }
+        },
+        {
+          "id": "B029_D",
+          "text": "同时开始所有任务",
+          "scoring": {
+            "reliability": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B030",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "reliability",
+      "subDimension": "可靠性",
+      "prompt": "你发现自己答应得太多。你通常？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B030",
+      "options": [
+        {
+          "id": "B030_A",
+          "text": "继续接，之后再想办法",
+          "scoring": {
+            "reliability": 1
+          }
+        },
+        {
+          "id": "B030_B",
+          "text": "重新排序承诺，主动协商延期、转交或取消低优先事项",
+          "scoring": {
+            "reliability": 3
+          }
+        },
+        {
+          "id": "B030_C",
+          "text": "突然退出几个任务",
+          "scoring": {
+            "reliability": 1
+          }
+        },
+        {
+          "id": "B030_D",
+          "text": "牺牲休息全部做完",
+          "scoring": {
+            "reliability": 0
+          }
+        }
+      ],
+      "metadata": {
+        "consistencyGroups": [
+          "CG04"
+        ]
+      }
+    },
+    {
+      "id": "B031",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "reflection",
+      "subDimension": "反思",
+      "prompt": "一个你曾经很自信的方法连续两次失败。你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B031",
+      "options": [
+        {
+          "id": "B031_A",
+          "text": "第三次继续原样尝试",
+          "scoring": {
+            "reflection": 1
+          }
+        },
+        {
+          "id": "B031_B",
+          "text": "复盘失败模式，修改关键假设后再试",
+          "scoring": {
+            "reflection": 3
+          }
+        },
+        {
+          "id": "B031_C",
+          "text": "彻底放弃这个领域",
+          "scoring": {
+            "reflection": 1
+          }
+        },
+        {
+          "id": "B031_D",
+          "text": "归因于队友不给力",
+          "scoring": {
+            "reflection": 0
+          }
+        }
+      ],
+      "metadata": {
+        "consistencyGroups": [
+          "CG05"
+        ]
+      }
+    },
+    {
+      "id": "B032",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "reflection",
+      "subDimension": "反思",
+      "prompt": "别人给你的建议与你自己的判断相反。你更可能？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B032",
+      "options": [
+        {
+          "id": "B032_A",
+          "text": "因为是别人建议所以先拒绝",
+          "scoring": {
+            "reflection": 1
+          }
+        },
+        {
+          "id": "B032_B",
+          "text": "要求具体依据，并比较哪种信息能区分两种判断",
+          "scoring": {
+            "reflection": 3
+          }
+        },
+        {
+          "id": "B032_C",
+          "text": "为了显得开放全部接受",
+          "scoring": {
+            "reflection": 1
+          }
+        },
+        {
+          "id": "B032_D",
+          "text": "按对方资历决定",
+          "scoring": {
+            "reflection": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B033",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "reflection",
+      "subDimension": "反思",
+      "prompt": "你发现自己总在会议中最后一个发言，而且常影响别人。你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B033",
+      "options": [
+        {
+          "id": "B033_A",
+          "text": "说明自己更谨慎，不需要改",
+          "scoring": {
+            "reflection": 1
+          }
+        },
+        {
+          "id": "B033_B",
+          "text": "尝试更早表达半成品观点，并观察协作效果",
+          "scoring": {
+            "reflection": 3
+          }
+        },
+        {
+          "id": "B033_C",
+          "text": "以后都不发言",
+          "scoring": {
+            "reflection": 1
+          }
+        },
+        {
+          "id": "B033_D",
+          "text": "要求别人等你想完",
+          "scoring": {
+            "reflection": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B034",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "reflection",
+      "subDimension": "反思",
+      "prompt": "项目成功后你通常更愿意复盘什么？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B034",
+      "options": [
+        {
+          "id": "B034_A",
+          "text": "只总结成功经验",
+          "scoring": {
+            "reflection": 1
+          }
+        },
+        {
+          "id": "B034_B",
+          "text": "同时看有效机制、偶然因素、险些失败的部分",
+          "scoring": {
+            "reflection": 3
+          }
+        },
+        {
+          "id": "B034_C",
+          "text": "只总结个人贡献",
+          "scoring": {
+            "reflection": 1
+          }
+        },
+        {
+          "id": "B034_D",
+          "text": "成功说明无需复盘",
+          "scoring": {
+            "reflection": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B035",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "reflection",
+      "subDimension": "反思",
+      "prompt": "当你压力很大时，你最愿意怎么处理工作状态？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B035",
+      "options": [
+        {
+          "id": "B035_A",
+          "text": "尽量不让别人知道",
+          "scoring": {
+            "reflection": 1
+          }
+        },
+        {
+          "id": "B035_B",
+          "text": "识别最受影响的任务，并提前调整承诺或寻求支持",
+          "scoring": {
+            "reflection": 3
+          }
+        },
+        {
+          "id": "B035_C",
+          "text": "把压力转化为更长工作时间",
+          "scoring": {
+            "reflection": 1
+          }
+        },
+        {
+          "id": "B035_D",
+          "text": "直接停止沟通",
+          "scoring": {
+            "reflection": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "B036",
+      "version": 1,
+      "layer": "cooperation_behavior",
+      "dimension": "reflection",
+      "subDimension": "反思",
+      "prompt": "如果测评结果与你对自己的认识差异很大，你会？",
+      "scenarioType": "scenario",
+      "difficulty": 2,
+      "tags": [
+        "behavior",
+        "teamwork"
+      ],
+      "reverse": false,
+      "familyId": "F-B036",
+      "options": [
+        {
+          "id": "B036_A",
+          "text": "认为测评一定错",
+          "scoring": {
+            "reflection": 1
+          }
+        },
+        {
+          "id": "B036_B",
+          "text": "回看题目和具体经历，把差异当作进一步观察的线索",
+          "scoring": {
+            "reflection": 3
+          }
+        },
+        {
+          "id": "B036_C",
+          "text": "认为系统一定比自己客观",
+          "scoring": {
+            "reflection": 1
+          }
+        },
+        {
+          "id": "B036_D",
+          "text": "重新做直到结果符合预期",
+          "scoring": {
+            "reflection": 0
+          }
+        }
+      ],
+      "metadata": {
+        "consistencyGroups": [
+          "CG06"
+        ]
+      }
+    },
+    {
+      "id": "C001",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "research_skill",
+      "subDimension": "研究能力",
+      "prompt": "面对一个陌生议题，你最擅长的第一步是？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C001",
+      "options": [
+        {
+          "id": "C001_A",
+          "text": "快速搜集材料并整理出问题框架",
+          "scoring": {
+            "research_skill": 3
+          },
+          "roleSignals": {
+            "researcher": 3
+          }
+        },
+        {
+          "id": "C001_B",
+          "text": "立即组织大家开会",
+          "scoring": {
+            "research_skill": 1
+          },
+          "roleSignals": {
+            "organizer": 2,
+            "coordinator": 1
+          }
+        },
+        {
+          "id": "C001_C",
+          "text": "先做一个可运行的小样",
+          "scoring": {
+            "research_skill": 1
+          },
+          "roleSignals": {
+            "technical_support": 2,
+            "executor": 2
+          }
+        },
+        {
+          "id": "C001_D",
+          "text": "先设计传播标题",
+          "scoring": {
+            "research_skill": 0
+          },
+          "roleSignals": {
+            "communication": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "C002",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "research_skill",
+      "subDimension": "研究能力",
+      "prompt": "以下哪项最接近你当前能独立完成的工作？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C002",
+      "options": [
+        {
+          "id": "C002_A",
+          "text": "查找并比较多来源材料，形成带依据的综述",
+          "scoring": {
+            "research_skill": 3
+          },
+          "roleSignals": {
+            "researcher": 3
+          }
+        },
+        {
+          "id": "C002_B",
+          "text": "按既定步骤稳定执行重复任务",
+          "scoring": {
+            "research_skill": 1
+          },
+          "roleSignals": {
+            "executor": 3
+          }
+        },
+        {
+          "id": "C002_C",
+          "text": "协调多人按节点推进",
+          "scoring": {
+            "research_skill": 1
+          },
+          "roleSignals": {
+            "coordinator": 3
+          }
+        },
+        {
+          "id": "C002_D",
+          "text": "制作海报或短视频",
+          "scoring": {
+            "research_skill": 1
+          },
+          "roleSignals": {
+            "communication": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "C003",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "research_skill",
+      "subDimension": "研究能力",
+      "prompt": "如果给你两小时理解一个复杂争议，你最可能产出？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C003",
+      "options": [
+        {
+          "id": "C003_A",
+          "text": "关键概念、主要观点、证据与未解决问题的结构化笔记",
+          "scoring": {
+            "research_skill": 3
+          },
+          "roleSignals": {
+            "researcher": 3
+          }
+        },
+        {
+          "id": "C003_B",
+          "text": "一份任务清单",
+          "scoring": {
+            "research_skill": 1
+          },
+          "roleSignals": {
+            "executor": 2
+          }
+        },
+        {
+          "id": "C003_C",
+          "text": "一套分工表",
+          "scoring": {
+            "research_skill": 1
+          },
+          "roleSignals": {
+            "organizer": 2
+          }
+        },
+        {
+          "id": "C003_D",
+          "text": "一段有传播力的摘要",
+          "scoring": {
+            "research_skill": 1
+          },
+          "roleSignals": {
+            "communication": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "C004",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "research_skill",
+      "subDimension": "研究能力",
+      "prompt": "你对数据或材料中的异常值通常？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C004",
+      "options": [
+        {
+          "id": "C004_A",
+          "text": "先检查来源、口径和条件，再决定保留或解释",
+          "scoring": {
+            "research_skill": 3
+          },
+          "roleSignals": {
+            "researcher": 3,
+            "technical_support": 1
+          }
+        },
+        {
+          "id": "C004_B",
+          "text": "直接删除以保持整齐",
+          "scoring": {
+            "research_skill": 0
+          }
+        },
+        {
+          "id": "C004_C",
+          "text": "交给别人判断",
+          "scoring": {
+            "research_skill": 1
+          },
+          "roleSignals": {
+            "coordinator": 1
+          }
+        },
+        {
+          "id": "C004_D",
+          "text": "只关注总体趋势",
+          "scoring": {
+            "research_skill": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "C005",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "execution_skill",
+      "subDimension": "执行能力",
+      "prompt": "拿到明确任务后，你最有把握的是？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C005",
+      "options": [
+        {
+          "id": "C005_A",
+          "text": "拆成步骤并按节点稳定完成",
+          "scoring": {
+            "execution_skill": 3
+          },
+          "roleSignals": {
+            "executor": 3
+          }
+        },
+        {
+          "id": "C005_B",
+          "text": "提出新的理论框架",
+          "scoring": {
+            "execution_skill": 1
+          },
+          "roleSignals": {
+            "researcher": 2
+          }
+        },
+        {
+          "id": "C005_C",
+          "text": "协调各方意见",
+          "scoring": {
+            "execution_skill": 1
+          },
+          "roleSignals": {
+            "coordinator": 2
+          }
+        },
+        {
+          "id": "C005_D",
+          "text": "设计对外传播",
+          "scoring": {
+            "execution_skill": 1
+          },
+          "roleSignals": {
+            "communication": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "C006",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "execution_skill",
+      "subDimension": "执行能力",
+      "prompt": "以下哪种场景最接近你的强项？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C006",
+      "options": [
+        {
+          "id": "C006_A",
+          "text": "已有目标但事情很杂，需要把它推进到交付",
+          "scoring": {
+            "execution_skill": 3
+          },
+          "roleSignals": {
+            "executor": 3
+          }
+        },
+        {
+          "id": "C006_B",
+          "text": "目标还很模糊，需要定义问题",
+          "scoring": {
+            "execution_skill": 1
+          },
+          "roleSignals": {
+            "researcher": 2
+          }
+        },
+        {
+          "id": "C006_C",
+          "text": "多人之间信息混乱，需要对齐",
+          "scoring": {
+            "execution_skill": 1
+          },
+          "roleSignals": {
+            "coordinator": 3
+          }
+        },
+        {
+          "id": "C006_D",
+          "text": "需要动员和安排一批参与者",
+          "scoring": {
+            "execution_skill": 1
+          },
+          "roleSignals": {
+            "organizer": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "C007",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "execution_skill",
+      "subDimension": "执行能力",
+      "prompt": "当任务说明只有一句话时，你通常能做到？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C007",
+      "options": [
+        {
+          "id": "C007_A",
+          "text": "主动补齐交付标准后迅速开始",
+          "scoring": {
+            "execution_skill": 3
+          },
+          "roleSignals": {
+            "executor": 3,
+            "coordinator": 1
+          }
+        },
+        {
+          "id": "C007_B",
+          "text": "需要完整手册才能开始",
+          "scoring": {
+            "execution_skill": 1
+          },
+          "roleSignals": {
+            "executor": 1
+          }
+        },
+        {
+          "id": "C007_C",
+          "text": "先讨论任务背后的理论意义",
+          "scoring": {
+            "execution_skill": 1
+          },
+          "roleSignals": {
+            "researcher": 2
+          }
+        },
+        {
+          "id": "C007_D",
+          "text": "先想如何宣传成果",
+          "scoring": {
+            "execution_skill": 0
+          },
+          "roleSignals": {
+            "communication": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "C008",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "execution_skill",
+      "subDimension": "执行能力",
+      "prompt": "你对清单、版本、文件命名、截止时间这些细节的态度更接近？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C008",
+      "options": [
+        {
+          "id": "C008_A",
+          "text": "愿意维护，而且觉得它们能显著减少协作成本",
+          "scoring": {
+            "execution_skill": 3
+          },
+          "roleSignals": {
+            "executor": 3,
+            "coordinator": 1
+          }
+        },
+        {
+          "id": "C008_B",
+          "text": "能不用就不用",
+          "scoring": {
+            "execution_skill": 0
+          }
+        },
+        {
+          "id": "C008_C",
+          "text": "只在大型项目里需要",
+          "scoring": {
+            "execution_skill": 1
+          },
+          "roleSignals": {
+            "organizer": 1
+          }
+        },
+        {
+          "id": "C008_D",
+          "text": "更喜欢靠聊天记录",
+          "scoring": {
+            "execution_skill": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "C009",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "coordination_skill",
+      "subDimension": "协调能力",
+      "prompt": "多人合作时，你最擅长？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C009",
+      "options": [
+        {
+          "id": "C009_A",
+          "text": "把不同人的任务、依赖和时间对齐",
+          "scoring": {
+            "coordination_skill": 3
+          },
+          "roleSignals": {
+            "coordinator": 3
+          }
+        },
+        {
+          "id": "C009_B",
+          "text": "独立完成自己部分",
+          "scoring": {
+            "coordination_skill": 1
+          },
+          "roleSignals": {
+            "executor": 2
+          }
+        },
+        {
+          "id": "C009_C",
+          "text": "做深度分析",
+          "scoring": {
+            "coordination_skill": 1
+          },
+          "roleSignals": {
+            "researcher": 2
+          }
+        },
+        {
+          "id": "C009_D",
+          "text": "现场调动气氛",
+          "scoring": {
+            "coordination_skill": 1
+          },
+          "roleSignals": {
+            "organizer": 2,
+            "communication": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "C010",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "coordination_skill",
+      "subDimension": "协调能力",
+      "prompt": "如果两个人的信息不一致，你通常？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C010",
+      "options": [
+        {
+          "id": "C010_A",
+          "text": "核对来源并形成一个双方确认的版本",
+          "scoring": {
+            "coordination_skill": 3
+          },
+          "roleSignals": {
+            "coordinator": 3
+          }
+        },
+        {
+          "id": "C010_B",
+          "text": "选择你更信任的人",
+          "scoring": {
+            "coordination_skill": 0
+          }
+        },
+        {
+          "id": "C010_C",
+          "text": "让负责人裁决",
+          "scoring": {
+            "coordination_skill": 1
+          },
+          "roleSignals": {
+            "organizer": 1
+          }
+        },
+        {
+          "id": "C010_D",
+          "text": "暂时忽略差异",
+          "scoring": {
+            "coordination_skill": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "C011",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "coordination_skill",
+      "subDimension": "协调能力",
+      "prompt": "你更容易在哪类工作中获得成就感？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C011",
+      "options": [
+        {
+          "id": "C011_A",
+          "text": "让原本互相卡住的人顺利协作起来",
+          "scoring": {
+            "coordination_skill": 3
+          },
+          "roleSignals": {
+            "coordinator": 3
+          }
+        },
+        {
+          "id": "C011_B",
+          "text": "独自完成一个难题",
+          "scoring": {
+            "coordination_skill": 1
+          },
+          "roleSignals": {
+            "researcher": 2,
+            "technical_support": 1
+          }
+        },
+        {
+          "id": "C011_C",
+          "text": "把大量事项按期做完",
+          "scoring": {
+            "coordination_skill": 1
+          },
+          "roleSignals": {
+            "executor": 2
+          }
+        },
+        {
+          "id": "C011_D",
+          "text": "把活动现场带起来",
+          "scoring": {
+            "coordination_skill": 1
+          },
+          "roleSignals": {
+            "organizer": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "C012",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "coordination_skill",
+      "subDimension": "协调能力",
+      "prompt": "团队临时改变目标时，你最能提供什么？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C012",
+      "options": [
+        {
+          "id": "C012_A",
+          "text": "迅速同步变化、重排依赖并确认谁受影响",
+          "scoring": {
+            "coordination_skill": 3
+          },
+          "roleSignals": {
+            "coordinator": 3
+          }
+        },
+        {
+          "id": "C012_B",
+          "text": "继续完成原任务",
+          "scoring": {
+            "coordination_skill": 1
+          },
+          "roleSignals": {
+            "executor": 1
+          }
+        },
+        {
+          "id": "C012_C",
+          "text": "重新分析目标是否合理",
+          "scoring": {
+            "coordination_skill": 1
+          },
+          "roleSignals": {
+            "researcher": 2
+          }
+        },
+        {
+          "id": "C012_D",
+          "text": "重新做传播口径",
+          "scoring": {
+            "coordination_skill": 1
+          },
+          "roleSignals": {
+            "communication": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "C013",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "organization_skill",
+      "subDimension": "组织能力",
+      "prompt": "如果要办一场30人的线下活动，你最愿意承担？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C013",
+      "options": [
+        {
+          "id": "C013_A",
+          "text": "时间表、场地、人员、物资和应急安排",
+          "scoring": {
+            "organization_skill": 3
+          },
+          "roleSignals": {
+            "organizer": 3
+          }
+        },
+        {
+          "id": "C013_B",
+          "text": "主题背景研究",
+          "scoring": {
+            "organization_skill": 1
+          },
+          "roleSignals": {
+            "researcher": 2
+          }
+        },
+        {
+          "id": "C013_C",
+          "text": "现场技术设备",
+          "scoring": {
+            "organization_skill": 1
+          },
+          "roleSignals": {
+            "technical_support": 2
+          }
+        },
+        {
+          "id": "C013_D",
+          "text": "宣传文案和视觉",
+          "scoring": {
+            "organization_skill": 1
+          },
+          "roleSignals": {
+            "communication": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "C014",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "organization_skill",
+      "subDimension": "组织能力",
+      "prompt": "活动当天突然少了两名志愿者，你更可能？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C014",
+      "options": [
+        {
+          "id": "C014_A",
+          "text": "重新排岗位并保住最关键环节",
+          "scoring": {
+            "organization_skill": 3
+          },
+          "roleSignals": {
+            "organizer": 3,
+            "coordinator": 1
+          }
+        },
+        {
+          "id": "C014_B",
+          "text": "暂停活动",
+          "scoring": {
+            "organization_skill": 0
+          }
+        },
+        {
+          "id": "C014_C",
+          "text": "自己顶所有岗位",
+          "scoring": {
+            "organization_skill": 2
+          },
+          "roleSignals": {
+            "executor": 2
+          }
+        },
+        {
+          "id": "C014_D",
+          "text": "先发通知解释原因",
+          "scoring": {
+            "organization_skill": 1
+          },
+          "roleSignals": {
+            "communication": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "C015",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "organization_skill",
+      "subDimension": "组织能力",
+      "prompt": "你对“谁在什么时候做什么”这类问题通常？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C015",
+      "options": [
+        {
+          "id": "C015_A",
+          "text": "很敏感，会主动整理责任和时间表",
+          "scoring": {
+            "organization_skill": 3
+          },
+          "roleSignals": {
+            "organizer": 3
+          }
+        },
+        {
+          "id": "C015_B",
+          "text": "觉得太琐碎",
+          "scoring": {
+            "organization_skill": 0
+          }
+        },
+        {
+          "id": "C015_C",
+          "text": "只关心自己的任务",
+          "scoring": {
+            "organization_skill": 1
+          },
+          "roleSignals": {
+            "executor": 1
+          }
+        },
+        {
+          "id": "C015_D",
+          "text": "更关心讨论是否有深度",
+          "scoring": {
+            "organization_skill": 1
+          },
+          "roleSignals": {
+            "researcher": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "C016",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "organization_skill",
+      "subDimension": "组织能力",
+      "prompt": "面对十几项小任务，你最自然的做法是？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C016",
+      "options": [
+        {
+          "id": "C016_A",
+          "text": "按重要性、依赖和负责人排成可执行清单",
+          "scoring": {
+            "organization_skill": 3
+          },
+          "roleSignals": {
+            "organizer": 3,
+            "executor": 1
+          }
+        },
+        {
+          "id": "C016_B",
+          "text": "先做最有意思的",
+          "scoring": {
+            "organization_skill": 0
+          }
+        },
+        {
+          "id": "C016_C",
+          "text": "边做边看，不做计划",
+          "scoring": {
+            "organization_skill": 1
+          },
+          "roleSignals": {
+            "executor": 1
+          }
+        },
+        {
+          "id": "C016_D",
+          "text": "先写一份分析报告",
+          "scoring": {
+            "organization_skill": 1
+          },
+          "roleSignals": {
+            "researcher": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "C017",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "technical_skill",
+      "subDimension": "技术支持",
+      "prompt": "遇到软件、数据或设备问题时，你通常？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C017",
+      "options": [
+        {
+          "id": "C017_A",
+          "text": "能自己定位问题、搜索资料并完成基础修复",
+          "scoring": {
+            "technical_skill": 3
+          },
+          "roleSignals": {
+            "technical_support": 3
+          }
+        },
+        {
+          "id": "C017_B",
+          "text": "尽量绕开技术问题",
+          "scoring": {
+            "technical_skill": 0
+          }
+        },
+        {
+          "id": "C017_C",
+          "text": "主要负责协调别人处理",
+          "scoring": {
+            "technical_skill": 1
+          },
+          "roleSignals": {
+            "coordinator": 2
+          }
+        },
+        {
+          "id": "C017_D",
+          "text": "主要负责解释给其他人听",
+          "scoring": {
+            "technical_skill": 1
+          },
+          "roleSignals": {
+            "communication": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "C018",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "technical_skill",
+      "subDimension": "技术支持",
+      "prompt": "以下哪项最接近你的现状？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C018",
+      "options": [
+        {
+          "id": "C018_A",
+          "text": "能使用脚本、自动化工具或低代码方式改进流程",
+          "scoring": {
+            "technical_skill": 3
+          },
+          "roleSignals": {
+            "technical_support": 3
+          }
+        },
+        {
+          "id": "C018_B",
+          "text": "能熟练使用办公软件但不太处理技术问题",
+          "scoring": {
+            "technical_skill": 2
+          },
+          "roleSignals": {
+            "executor": 2
+          }
+        },
+        {
+          "id": "C018_C",
+          "text": "主要擅长文字和沟通",
+          "scoring": {
+            "technical_skill": 1
+          },
+          "roleSignals": {
+            "communication": 2
+          }
+        },
+        {
+          "id": "C018_D",
+          "text": "主要擅长组织现场",
+          "scoring": {
+            "technical_skill": 1
+          },
+          "roleSignals": {
+            "organizer": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "C019",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "technical_skill",
+      "subDimension": "技术支持",
+      "prompt": "新工具出现时，你通常？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C019",
+      "options": [
+        {
+          "id": "C019_A",
+          "text": "愿意先小范围试用并记录适用条件与风险",
+          "scoring": {
+            "technical_skill": 3
+          },
+          "roleSignals": {
+            "technical_support": 3,
+            "researcher": 1
+          }
+        },
+        {
+          "id": "C019_B",
+          "text": "等别人证明稳定后再用",
+          "scoring": {
+            "technical_skill": 1
+          },
+          "roleSignals": {
+            "executor": 1
+          }
+        },
+        {
+          "id": "C019_C",
+          "text": "只看宣传介绍",
+          "scoring": {
+            "technical_skill": 0
+          },
+          "roleSignals": {
+            "communication": 1
+          }
+        },
+        {
+          "id": "C019_D",
+          "text": "觉得工具不重要",
+          "scoring": {
+            "technical_skill": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "C020",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "technical_skill",
+      "subDimension": "技术支持",
+      "prompt": "别人电脑上的流程很慢，你最可能？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C020",
+      "options": [
+        {
+          "id": "C020_A",
+          "text": "先定位瓶颈，再看能否通过设置、脚本或工具简化",
+          "scoring": {
+            "technical_skill": 3
+          },
+          "roleSignals": {
+            "technical_support": 3
+          }
+        },
+        {
+          "id": "C020_B",
+          "text": "建议换电脑",
+          "scoring": {
+            "technical_skill": 1
+          }
+        },
+        {
+          "id": "C020_C",
+          "text": "帮他重新安排工作顺序",
+          "scoring": {
+            "technical_skill": 1
+          },
+          "roleSignals": {
+            "coordinator": 1
+          }
+        },
+        {
+          "id": "C020_D",
+          "text": "建议减少任务",
+          "scoring": {
+            "technical_skill": 1
+          },
+          "roleSignals": {
+            "organizer": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "C021",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "communication_skill",
+      "subDimension": "传播表达",
+      "prompt": "如果要把一个复杂项目介绍给陌生人，你最有把握的是？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C021",
+      "options": [
+        {
+          "id": "C021_A",
+          "text": "提炼核心信息并根据受众调整表达",
+          "scoring": {
+            "communication_skill": 3
+          },
+          "roleSignals": {
+            "communication": 3
+          }
+        },
+        {
+          "id": "C021_B",
+          "text": "提供完整技术文档",
+          "scoring": {
+            "communication_skill": 1
+          },
+          "roleSignals": {
+            "technical_support": 2
+          }
+        },
+        {
+          "id": "C021_C",
+          "text": "提供详细研究背景",
+          "scoring": {
+            "communication_skill": 1
+          },
+          "roleSignals": {
+            "researcher": 2
+          }
+        },
+        {
+          "id": "C021_D",
+          "text": "安排介绍流程和人员",
+          "scoring": {
+            "communication_skill": 1
+          },
+          "roleSignals": {
+            "organizer": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "C022",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "communication_skill",
+      "subDimension": "传播表达",
+      "prompt": "以下哪项你更容易独立完成？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C022",
+      "options": [
+        {
+          "id": "C022_A",
+          "text": "写一篇结构清晰、面向普通人的介绍文章",
+          "scoring": {
+            "communication_skill": 3
+          },
+          "roleSignals": {
+            "communication": 3
+          }
+        },
+        {
+          "id": "C022_B",
+          "text": "建立项目进度表",
+          "scoring": {
+            "communication_skill": 1
+          },
+          "roleSignals": {
+            "organizer": 2
+          }
+        },
+        {
+          "id": "C022_C",
+          "text": "写研究综述",
+          "scoring": {
+            "communication_skill": 1
+          },
+          "roleSignals": {
+            "researcher": 2
+          }
+        },
+        {
+          "id": "C022_D",
+          "text": "排查软件问题",
+          "scoring": {
+            "communication_skill": 1
+          },
+          "roleSignals": {
+            "technical_support": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "C023",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "communication_skill",
+      "subDimension": "传播表达",
+      "prompt": "团队观点很多但对外信息很乱，你更可能？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C023",
+      "options": [
+        {
+          "id": "C023_A",
+          "text": "整理共同结论、保留必要差异并形成统一说明",
+          "scoring": {
+            "communication_skill": 3
+          },
+          "roleSignals": {
+            "communication": 3,
+            "coordinator": 1
+          }
+        },
+        {
+          "id": "C023_B",
+          "text": "把所有观点都放出去",
+          "scoring": {
+            "communication_skill": 1
+          }
+        },
+        {
+          "id": "C023_C",
+          "text": "只使用负责人的表达",
+          "scoring": {
+            "communication_skill": 1
+          },
+          "roleSignals": {
+            "organizer": 1
+          }
+        },
+        {
+          "id": "C023_D",
+          "text": "暂时停止传播",
+          "scoring": {
+            "communication_skill": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "C024",
+      "version": 1,
+      "layer": "skill_role",
+      "dimension": "communication_skill",
+      "subDimension": "传播表达",
+      "prompt": "你更擅长哪种反馈？",
+      "scenarioType": "skill",
+      "difficulty": 2,
+      "tags": [
+        "skill",
+        "role"
+      ],
+      "reverse": false,
+      "familyId": "F-C024",
+      "options": [
+        {
+          "id": "C024_A",
+          "text": "指出内容哪里让人难懂，并给出更清楚的改写",
+          "scoring": {
+            "communication_skill": 3
+          },
+          "roleSignals": {
+            "communication": 3
+          }
+        },
+        {
+          "id": "C024_B",
+          "text": "指出任务哪里没有按计划完成",
+          "scoring": {
+            "communication_skill": 1
+          },
+          "roleSignals": {
+            "executor": 2
+          }
+        },
+        {
+          "id": "C024_C",
+          "text": "指出论证哪里证据不足",
+          "scoring": {
+            "communication_skill": 1
+          },
+          "roleSignals": {
+            "researcher": 2
+          }
+        },
+        {
+          "id": "C024_D",
+          "text": "指出流程哪里需要换人",
+          "scoring": {
+            "communication_skill": 1
+          },
+          "roleSignals": {
+            "organizer": 2
+          }
+        }
+      ]
+    }
+  ]
+}

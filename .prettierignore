@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+exports/
+package-lock.json
+*.md
+
+# Frozen content is a byte-for-byte copy of the source question bank bundle and is hash-verified
+# against it. Reformatting it would break that equality, so Prettier never touches content/.
+content/

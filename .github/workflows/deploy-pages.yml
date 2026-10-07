@@ -1,0 +1,65 @@
+name: Deploy to GitHub Pages
+
+# Engineering Bible §41: V0.1 must be *able* to deploy to GitHub Pages, and must not require it.
+# This workflow is therefore `workflow_dispatch` only — it never runs on push, so the repository
+# can stay un-deployed by default.
+#
+# Read this before enabling it (source README line 85): a public Pages deployment publishes the
+# full 120-item question bank AND the scoring rules to anyone who downloads the JS bundle.
+# Obfuscation is not secrecy. If the scoring rules must stay private, change the deployment
+# architecture instead of relying on the front end to hide them.
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_path:
+        description: 'Vite base path, e.g. /cohortlens/ for username.github.io/cohortlens/'
+        required: true
+        default: '/cohortlens/'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run validate:questions
+      - run: npm run test
+
+      - name: Build with the requested base path
+        env:
+          VITE_BASE: ${{ inputs.base_path }}
+        run: npm run build
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

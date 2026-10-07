@@ -1,0 +1,87 @@
+{
+  "id": "roles-v1",
+  "version": "1.0.0",
+  "rule": "Only cooperation_behavior and skill_role dimensions may be used.",
+  "roles": [
+    {
+      "id": "researcher",
+      "name": "研究/分析",
+      "weights": {
+        "reflection": 0.15,
+        "communication": 0.1,
+        "reliability": 0.1,
+        "research_skill": 0.5,
+        "technical_skill": 0.1,
+        "coordination_skill": 0.05
+      }
+    },
+    {
+      "id": "executor",
+      "name": "执行/推进",
+      "weights": {
+        "responsibility": 0.15,
+        "reliability": 0.2,
+        "initiative": 0.1,
+        "execution_skill": 0.45,
+        "organization_skill": 0.1
+      }
+    },
+    {
+      "id": "coordinator",
+      "name": "协调/接口",
+      "weights": {
+        "communication": 0.2,
+        "conflict_handling": 0.2,
+        "reliability": 0.1,
+        "coordination_skill": 0.4,
+        "organization_skill": 0.1
+      }
+    },
+    {
+      "id": "organizer",
+      "name": "组织/统筹",
+      "weights": {
+        "responsibility": 0.15,
+        "initiative": 0.1,
+        "reliability": 0.15,
+        "organization_skill": 0.45,
+        "coordination_skill": 0.15
+      }
+    },
+    {
+      "id": "technical_support",
+      "name": "技术支持",
+      "weights": {
+        "reliability": 0.1,
+        "initiative": 0.15,
+        "reflection": 0.1,
+        "technical_skill": 0.5,
+        "execution_skill": 0.15
+      }
+    },
+    {
+      "id": "communication",
+      "name": "传播/表达",
+      "weights": {
+        "communication": 0.25,
+        "reflection": 0.1,
+        "conflict_handling": 0.1,
+        "communication_skill": 0.45,
+        "coordination_skill": 0.1
+      }
+    }
+  ],
+  "roleSignalPolicy": "Option roleSignals are secondary evidence; normalized dimension scores remain primary.",
+  "outputLanguage": [
+    "当前回答显示",
+    "较可能适合",
+    "可优先尝试"
+  ],
+  "forbiddenLanguage": [
+    "就是这种人",
+    "政治可靠",
+    "忠诚",
+    "应当吸纳",
+    "应当淘汰"
+  ]
+}
