@@ -47,24 +47,33 @@ describe('sampler — layer quota (Engineering Bible §11)', () => {
     }
   })
 
-  it('splits layer A as 4 + 4 + 4 + 3 with a single short dimension', () => {
-    let shortDimension: string | null = null
+  it('splits layer A strictly by the pack-declared per-dimension quota', () => {
+    const quota = pack.assessmentPolicy.subQuota?.theory_value
+    expect(quota, 'the active pack must declare an A-layer subQuota').toBeDefined()
+    const dimensions = Object.keys(scoring.layerA.dimensions)
+    const byId = new Map(pack.questions.map((question) => [question.id, question]))
     for (let index = 0; index < 300; index += 1) {
       const result = sampleQuestionSet({ pack, scoring, seed: `layerA-${index}` })
-      const byId = new Map(pack.questions.map((question) => [question.id, question]))
       const counts = new Map<string, number>()
       for (const questionId of result.questionIds) {
         const question = byId.get(questionId)
         if (question?.layer !== 'theory_value') continue
         counts.set(question.dimension, (counts.get(question.dimension) ?? 0) + 1)
       }
-      expect(counts.size).toBe(4)
-      const values = [...counts.values()].sort((a, b) => a - b)
-      expect(values).toEqual([3, 4, 4, 4])
-      const short = [...counts.entries()].filter(([, count]) => count === 3).map(([id]) => id)
-      expect(short).toHaveLength(1)
-      shortDimension = short[0] ?? null
-      expect(result.layerAShortDimension).toBe(shortDimension)
+      /**
+       * Every declared A dimension appears exactly as often as the pack declares. No rotation, no
+       * shortfall: A-layer V1.1's six dimensions carry different kinds of evidence, so they are not
+       * interchangeable slots the way V1.0's four macro dimensions were (ADR-018).
+       */
+      for (const dimension of dimensions) {
+        expect(counts.get(dimension), `seed layerA-${index} dimension ${dimension}`).toBe(
+          quota?.[dimension],
+        )
+      }
+      expect([...counts.values()].reduce((a, b) => a + b, 0)).toBe(
+        pack.assessmentPolicy.quota.theory_value,
+      )
+      expect(result.layerAShortDimension).toBeNull()
     }
   })
 
@@ -162,34 +171,29 @@ describe('sampler — reproducibility (Engineering Bible §12)', () => {
     expect(() => sampleQuestionSet({ pack, scoring, seed: '  ' })).toThrow(SamplerError)
   })
 
-  it('rotates the layer-A short dimension instead of fixing it', () => {
-    const shortCounts = new Map<string, number>()
-    for (let index = 0; index < 400; index += 1) {
-      const result = sampleQuestionSet({ pack, scoring, seed: `rotate-${index}` })
-      const short = result.layerAShortDimension ?? 'none'
-      shortCounts.set(short, (shortCounts.get(short) ?? 0) + 1)
+  it('draws a different paper every time but never a different quota', () => {
+    // The A-layer split is fixed by the pack, so unlike V1.0 there is nothing to rotate. What must
+    // still vary is which questions fill those slots.
+    const papers = new Set<string>()
+    for (let index = 0; index < 100; index += 1) {
+      const result = sampleQuestionSet({ pack, scoring, seed: `vary-${index}` })
+      papers.add([...result.questionIds].sort().join(','))
     }
-    expect(shortCounts.size).toBe(4)
-    for (const count of shortCounts.values()) {
-      // Uniform would be 100; anything above 175 would signal a fixed bias.
-      expect(count).toBeLessThan(175)
-      expect(count).toBeGreaterThan(25)
-    }
+    expect(papers.size).toBe(100)
   })
 
-  it('honours previousSessions by avoiding the most recent short dimension', () => {
-    for (let index = 0; index < 100; index += 1) {
-      const first = sampleQuestionSet({ pack, scoring, seed: `history-a-${index}` })
-      const second = sampleQuestionSet({
-        pack,
-        scoring,
-        seed: `history-b-${index}`,
-        previousSessions: [
-          { seed: first.layerAShortDimension ?? '', shortDimension: first.layerAShortDimension },
-        ],
-      })
-      expect(second.layerAShortDimension).not.toBe(first.layerAShortDimension)
-    }
+  it('ignores legacy previousSessions instead of misreading them', () => {
+    // V1.0 sessions carried a rotating shortfall. V1.1 has none, so passing old history must not
+    // change the declared quota or throw.
+    const baseline = sampleQuestionSet({ pack, scoring, seed: 'legacy-baseline' })
+    const withHistory = sampleQuestionSet({
+      pack,
+      scoring,
+      seed: 'legacy-baseline',
+      previousSessions: [{ seed: 'old', shortDimension: 'conceptual_understanding' }],
+    })
+    expect(withHistory.questionIds).toEqual(baseline.questionIds)
+    expect(withHistory.layerAShortDimension).toBeNull()
   })
 })
 
@@ -208,9 +212,13 @@ describe('sampler — stage reporting', () => {
     ]) {
       expect(byStageName.has(expected)).toBe(true)
     }
-    // These three are structurally inert under bank V1.0 and must say so.
-    expect(byStageName.get('difficulty_balance')?.active).toBe(false)
-    expect(byStageName.get('family_conflict_filtering')?.active).toBe(false)
+    /**
+     * Under the active V1.1 pack the family stage is now *active* (the A layer shares families across
+     * sub-topics) and the difficulty stage is active too (the A layer carries three levels). Only
+     * semantic exclusion stays inert, because the pack declares no exclusion rules.
+     */
+    expect(byStageName.get('family_conflict_filtering')?.active).toBe(true)
+    expect(byStageName.get('difficulty_balance')?.active).toBe(true)
     expect(byStageName.get('semantic_exclusion')?.active).toBe(false)
     expect(byStageName.get('layer_partition')?.active).toBe(true)
     expect(byStageName.get('seeded_sampling')?.active).toBe(true)
@@ -270,48 +278,58 @@ describe('sampler — layer-A plan arithmetic', () => {
     }
   }
 
-  it('keeps the shipped layer-A split at 4 + 4 + 4 + 3 when declared targets are balanced', () => {
-    const result = sampleQuestionSet({ pack, scoring, seed: 'balanced-plan' })
-    const byId = new Map(pack.questions.map((question) => [question.id, question]))
-    const perDimension = new Map<string, number>()
-    for (const questionId of result.questionIds) {
-      const question = byId.get(questionId)
-      if (question?.layer !== 'theory_value') continue
-      perDimension.set(question.dimension, (perDimension.get(question.dimension) ?? 0) + 1)
-    }
-    expect([...perDimension.values()].sort((a, b) => a - b)).toEqual([3, 4, 4, 4])
+  it('refuses a pack whose A subQuota does not sum to the layer quota', () => {
+    // A-layer V1.1 reads the quota verbatim instead of deriving it. A pack that declares a
+    // contradictory total is rejected rather than silently rescaled, because rescaling would change
+    // the information budget the author chose.
+    const packTooSmall = buildTwoDimensionPack({ a_one: 1, a_two: 1 })
+    expect(() =>
+      sampleQuestionSet({ pack: packTooSmall, scoring: trimmedScoring, seed: 'grow-plan' }),
+    ).toThrow(/A 层配额之和 2 不等于层级配额 4/)
+
+    const packTooLarge = buildTwoDimensionPack({ a_one: 3, a_two: 3 })
+    expect(() =>
+      sampleQuestionSet({ pack: packTooLarge, scoring: trimmedScoring, seed: 'trim-plan' }),
+    ).toThrow(/A 层配额之和 6 不等于层级配额 4/)
   })
 
-  it('grows the plan when the declared target is below the layer quota', () => {
-    const packGrow = buildTwoDimensionPack({ a_one: 1, a_two: 1 })
-    const result = sampleQuestionSet({ pack: packGrow, scoring: trimmedScoring, seed: 'grow-plan' })
+  it('draws exactly the declared per-dimension split when the totals agree', () => {
+    const packOk = buildTwoDimensionPack({ a_one: 2, a_two: 2 })
+    const result = sampleQuestionSet({ pack: packOk, scoring: trimmedScoring, seed: 'exact-plan' })
     expect(result.questionIds).toHaveLength(4)
-    expect(new Set(result.questionIds).size).toBe(4)
-    const byId = new Map(packGrow.questions.map((question) => [question.id, question]))
+    const byId = new Map(packOk.questions.map((question) => [question.id, question]))
     const perDimension = new Map<string, number>()
     for (const questionId of result.questionIds) {
       const question = byId.get(questionId)
       if (!question) continue
       perDimension.set(question.dimension, (perDimension.get(question.dimension) ?? 0) + 1)
     }
-    // The two added items are spread evenly across the two dimensions.
-    expect([...perDimension.values()].sort((a, b) => a - b)).toEqual([2, 2])
+    expect(perDimension.get('a_one')).toBe(2)
+    expect(perDimension.get('a_two')).toBe(2)
   })
 
-  it('trims the plan when the declared target exceeds the layer quota', () => {
-    const packTrim = buildTwoDimensionPack({ a_one: 3, a_two: 3 })
-    const result = sampleQuestionSet({ pack: packTrim, scoring: trimmedScoring, seed: 'trim-plan' })
-    expect(result.questionIds).toHaveLength(4)
-    const byId = new Map(packTrim.questions.map((question) => [question.id, question]))
-    const perDimension = new Map<string, number>()
-    for (const questionId of result.questionIds) {
-      const question = byId.get(questionId)
-      if (!question) continue
-      perDimension.set(question.dimension, (perDimension.get(question.dimension) ?? 0) + 1)
+  it('refuses a pack that omits a declared dimension from its subQuota', () => {
+    const packMissing = {
+      ...trimmedWidePack,
+      assessmentPolicy: {
+        ...trimmedWidePack.assessmentPolicy,
+        quota: { theory_value: 4, cooperation_behavior: 0, skill_role: 0 },
+        totalQuestions: 4,
+        subQuota: {
+          // `a_two` is declared by the scoring model but has no quota here.
+          theory_value: { a_one: 4 },
+          cooperation_behavior: {
+            minimumPerDimension: 0,
+            remaining: 0,
+            strategy: 'balanced_random' as const,
+          },
+          skill_role: { exactlyPerDimension: 0 },
+        },
+      },
     }
-    // Trimming stays even too, so the plan is 2 + 2 rather than 1 + 3.
-    expect([...perDimension.values()].sort((a, b) => a - b)).toEqual([2, 2])
-    expect(result.layerAShortDimension).toBeDefined()
+    expect(() =>
+      sampleQuestionSet({ pack: packMissing, scoring: trimmedScoring, seed: 'missing-quota' }),
+    ).toThrow(/未在 assessmentPolicy.subQuota.theory_value 中声明单次配额/)
   })
 
   it('refuses a pack that uses dimensions the scoring model never declared', () => {

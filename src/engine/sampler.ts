@@ -1,11 +1,12 @@
 import { createRng, type Rng } from './rng.ts'
 import {
   LAYERS,
+  type EngineStageStatus,
   type Layer,
+  type OptionOrderPolicy,
   type Question,
   type QuestionPack,
   type ScoringModel,
-  type EngineStageStatus,
 } from '../domain/schemas.ts'
 
 /**
@@ -32,7 +33,14 @@ export interface SampledQuestionSet {
   /** questionIds in assessment order: layer A, then B, then C. */
   questionIds: string[]
   stages: SamplerStageReport[]
-  /** For layer A: which of the four macro dimensions received 3 instead of 4 items. */
+  /**
+   * Always `null` from A-layer V1.1 onwards.
+   *
+   * V1.0 gave every A dimension the same target and rotated which one received one item fewer, so
+   * the sampler had to report which dimension that was. V1.1 declares a fixed, deliberately uneven
+   * split (2/3/3/3/2/2) per dimension, so there is no shortfall to report. The field is kept so a
+   * stored V1.0 session can still be read back without a database migration.
+   */
   layerAShortDimension: string | null
 }
 
@@ -106,17 +114,6 @@ function hasFamilyConflict(questions: readonly Question[]): boolean {
   return false
 }
 
-/** How many distinct familyIds the pool could ever contribute (undefined familyIds are free). */
-function availableFamilies(pool: readonly Question[]): number {
-  const families = new Set<string>()
-  let undefinedFamily = 0
-  for (const question of pool) {
-    if (question.familyId) families.add(question.familyId)
-    else undefinedFamily += 1
-  }
-  return families.size + undefinedFamily
-}
-
 /**
  * Difficulty balance (§10/§11): keep the drawn paper from over-concentrating on one difficulty.
  * Under bank V1.0 every question is difficulty 2, so the stage cannot act — reported as inactive.
@@ -136,45 +133,61 @@ function balanceDifficulty(
     }
   }
   const cap = maxPerLevel ?? Math.max(1, Math.ceil(plan.length / levels.size) + 1)
-  const kept: Question[] = []
-  const displaced: Question[] = []
-  for (const question of plan) {
-    if (kept.filter((entry) => entry.difficulty === question.difficulty).length >= cap) {
-      displaced.push(question)
+
+  /**
+   * The balance is done by **swapping**, never by dropping, and only **within the same dimension**.
+   *
+   * Two defects drove this shape, both found by the per-dimension quota assertion downstream:
+   *
+   *   1. An earlier version moved over-cap items into a "displaced" list and pushed the original
+   *      back only if a replacement existed. A missing replacement silently *shrank the paper*.
+   *   2. The first swap version drew replacements from the whole layer pool, so it could exchange an
+   *      item of one dimension for an item of another and break the declared per-dimension quota
+   *      (A-layer V1.1 draws a non-uniform 2/3/3/3/2/2).
+   *
+   * Constraining swaps to the same dimension makes the dimension counts invariant by construction,
+   * so this stage can only change *which* question occupies a slot. If no legal swap exists the
+   * over-cap item is kept and the shortfall is reported in `reason`, never achieved by removing a
+   * question.
+   */
+  const picked = [...plan]
+  const usedIds = new Set(picked.map((question) => question.id))
+  const alternatives = rng.shuffle(pool.filter((question) => !usedIds.has(question.id)))
+  let swaps = 0
+  let unsatisfied = 0
+
+  const countAt = (level: number): number =>
+    picked.filter((entry) => entry.difficulty === level).length
+
+  for (let index = 0; index < picked.length; index += 1) {
+    const current = picked[index]
+    if (!current) continue
+    if (countAt(current.difficulty) <= cap) continue
+
+    const candidate = alternatives.find(
+      (entry) =>
+        entry.dimension === current.dimension &&
+        entry.difficulty !== current.difficulty &&
+        countAt(entry.difficulty) < cap &&
+        !picked.some((existing) => existing.id === entry.id) &&
+        !hasFamilyConflict([...picked.filter((existing) => existing.id !== current.id), entry]),
+    )
+    if (!candidate) {
+      unsatisfied += 1
       continue
     }
-    kept.push(question)
+    picked[index] = candidate
+    alternatives.splice(alternatives.indexOf(candidate), 1)
+    swaps += 1
   }
-  const usedIds = new Set(plan.map((question) => question.id))
-  const extra = rng.shuffle(pool.filter((question) => !usedIds.has(question.id)))
-  const picked = [...kept]
-  for (const question of displaced) {
-    const level = question.difficulty
-    const usedAtLevel = picked.filter((entry) => entry.difficulty === level).length
-    if (usedAtLevel < cap) {
-      picked.push(question)
-      continue
-    }
-    const levelAlternatives = extra.filter(
-      (candidate) =>
-        candidate.difficulty !== level &&
-        picked.filter((entry) => entry.difficulty === candidate.difficulty).length < cap &&
-        !picked.some((entry) => entry.id === candidate.id) &&
-        !hasFamilyConflict([...picked, candidate]),
-    )
-    const fallbackAlternatives = extra.filter(
-      (candidate) =>
-        !picked.some((entry) => entry.id === candidate.id) &&
-        !hasFamilyConflict([...picked, candidate]),
-    )
-    const replacement = levelAlternatives[0] ?? fallbackAlternatives[0]
-    if (replacement) picked.push(replacement)
-    else picked.push(question)
-  }
+
   return {
     picked,
     active: true,
-    reason: `按难度上限 ${cap} 均衡，位移 ${displaced.length} 题，最终 ${picked.length} 题`,
+    reason:
+      unsatisfied === 0
+        ? `按难度上限 ${cap} 均衡，替换 ${swaps} 题，题量保持 ${picked.length} 题`
+        : `按难度上限 ${cap} 均衡，替换 ${swaps} 题；有 ${unsatisfied} 题找不到可替换项（题量不变，仅难度分布未完全均衡）`,
   }
 }
 
@@ -214,9 +227,7 @@ export function sampleQuestionSet({
 }: SampleInput): SampledQuestionSet {
   if (!seed.trim()) throw new SamplerError('seed 不能为空：抽题必须可复现（§12）')
 
-  const rng = createRng(seed)
   const policy = pack.assessmentPolicy
-  const quota = policy.quota
   const subQuota = policy.subQuota
   const stages: SamplerStageReport[] = []
 
@@ -259,112 +270,77 @@ export function sampleQuestionSet({
     ),
   )
 
-  // --- Layer A: 15 items, per-dimension subQuota, short dimension rotates ----
+  // --- Layer A: 15 items, strict per-dimension subQuota ----------------------
   const layerA = byLayer.get('theory_value') ?? []
   const groupsA = groupByDimension(layerA)
   const dimsA = dimensionsByLayer.get('theory_value') ?? []
   if (dimsA.length === 0) throw new SamplerError('评分模型未声明任何 A 层维度')
 
-  const previousShortDimensions = previousSessions
-    .map((session) => session.shortDimension)
-    .filter((dimension): dimension is string => Boolean(dimension))
-  const lastShort = previousShortDimensions.at(-1)
-  // Prefer a dimension that was not the most recent short one. Uniform choice among the rest.
-  const eligible =
-    dimsA.length > 1 && lastShort ? dimsA.filter((dimension) => dimension !== lastShort) : dimsA
-  const shortDimension = rng.pick(eligible)
-
-  const declaredSubQuotaA = subQuota?.theory_value ?? {}
-  const declaredA = dimsA
-    .map((dimension) => declaredSubQuotaA[dimension])
-    .filter((value): value is number => value !== undefined)
-
   /**
-   * A-layer plan, derived from the pack rather than hard-coded.
+   * A-layer plan = the pack's declared per-dimension subQuota, verbatim.
    *
-   * The source README (line 26) fixes the assessment split at 4 + 4 + 4 + 3 and requires that
-   * *which* dimension loses one item rotates ("不能永久固定同一维少抽"). The declared numbers
-   * cannot therefore be bound to fixed dimensions.
+   * V1.0 declared a uniform target and one rotating shortfall (4/4/4/3), and the sampler used to
+   * *derive* which dimension lost the item. A-layer V1.1 replaces that with a genuinely uneven,
+   * fixed split — 2/3/3/3/2/2 across six dimensions — because the six dimensions are different
+   * kinds of evidence, not interchangeable slots. There is nothing left to rotate, so the plan is
+   * now read directly and the rotation machinery is gone (ADR-018).
    *
-   * Construction:
-   *   1. baseline = max declared per-dimension target (4 for bank V1.0) applied to every
-   *      dimension, so the baseline total (16) exceeds the layer quota (15);
-   *   2. remove `baselineTotal - quota` items, taking one from the rotating short dimension
-   *      first and then from whichever dimension has the largest declared target (ties by id);
-   *   3. if a pack's baseline total is *below* the quota, add the difference to the dimensions
-   *      with the smallest current target (ties by declared order, then by id).
-   *
-   * Every step is deterministic and the sum is exact by construction, so the resulting plan
-   * always equals the layer quota. This replaced an earlier arithmetic version that could emit
-   * 4/4/4/4 or a negative count — see ADR-010.
+   * The sum must equal the layer quota; a pack that declares otherwise is rejected rather than
+   * silently rescaled, because rescaling would change the information budget the author chose.
    */
-  const baselineA =
-    declaredA.length > 0
-      ? Math.max(...declaredA)
-      : Math.ceil(layerQuota(pack, 'theory_value') / Math.max(1, dimsA.length))
-  const declaredWeight = (dimension: string): number => declaredSubQuotaA[dimension] ?? baselineA
-  /** Removal order: rotating short dimension first, then largest declared target. */
-  const removalOrder = [...dimsA].sort((a, b) => {
-    if (a === shortDimension) return -1
-    if (b === shortDimension) return 1
-    return declaredWeight(b) - declaredWeight(a) || (a < b ? -1 : 1)
-  })
-  /** Addition order: smallest current target, then declared order, then id. */
-  const additionOrder = [...dimsA].sort((a, b) => (a < b ? -1 : 1))
-
-  const planA = new Map<string, number>(dimsA.map((dimension) => [dimension, baselineA]))
-  let delta = baselineA * dimsA.length - layerQuota(pack, 'theory_value')
-  if (delta > 0) {
-    let guard = 0
-    let index = 0
-    while (delta > 0) {
-      if (guard > dimsA.length * (baselineA + 1) + 4) {
-        throw new SamplerError(`A 层配额压缩未收敛：仍差 ${delta} 题`)
-      }
-      guard += 1
-      const dimension = removalOrder[index % removalOrder.length]
-      index += 1
-      if (dimension === undefined) break
-      const current = planA.get(dimension) ?? 0
-      if (current <= 1) continue
-      planA.set(dimension, current - 1)
-      delta -= 1
+  const declaredSubQuotaA = subQuota?.theory_value ?? {}
+  const planA = new Map<string, number>()
+  for (const dimension of dimsA) {
+    const declared = declaredSubQuotaA[dimension]
+    if (declared === undefined) {
+      throw new SamplerError(
+        `A 层维度 ${dimension} 未在 assessmentPolicy.subQuota.theory_value 中声明单次配额。` +
+          `A 层 V1.1 的六个维度承载不同类型的证据，配额必须由题库显式声明，不能由抽样器推算。`,
+      )
     }
-  } else if (delta < 0) {
-    let remaining = -delta
-    let guard = 0
-    while (remaining > 0) {
-      if (guard > dimsA.length * 64) {
-        throw new SamplerError(`A 层配额补齐未收敛：仍差 ${remaining} 题`)
-      }
-      guard += 1
-      const dimension = additionOrder.reduce<string | undefined>((best, candidate) => {
-        if (best === undefined) return candidate
-        const bestCount = planA.get(best) ?? 0
-        const candidateCount = planA.get(candidate) ?? 0
-        return candidateCount < bestCount ? candidate : best
-      }, undefined)
-      if (dimension === undefined) break
-      planA.set(dimension, (planA.get(dimension) ?? 0) + 1)
-      remaining -= 1
-    }
+    planA.set(dimension, declared)
   }
 
   const sumA = [...planA.values()].reduce((a, b) => a + b, 0)
-  if (sumA !== quota.theory_value) {
+  if (sumA !== layerQuota(pack, 'theory_value')) {
     throw new SamplerError(
-      `A 层配额无法凑齐：计划 ${sumA} 题，需要 ${quota.theory_value} 题（各维目标 ${[
+      `A 层配额之和 ${sumA} 不等于层级配额 ${layerQuota(pack, 'theory_value')}（各维目标 ${[
         ...planA.entries(),
       ]
         .map(([dimension, count]) => `${dimension}=${count}`)
         .join(', ')}）`,
     )
   }
+  for (const [dimension, need] of planA) {
+    if (need === 0) continue
+    const pool = groupsA.get(dimension) ?? []
+    if (pool.length < need) {
+      throw new SamplerError(`A 层维度 ${dimension} 需要 ${need} 题，题库只有 ${pool.length} 题`)
+    }
+  }
 
   /**
-   * Draw a layer under both constraints at once and retry the draw if the family constraint
-   * cannot be met by that attempt. Because the constraint is enforced *during* the draw, a
-   * successful return always carries exactly the requested number of items.
+   * Legacy sessions carried the V1.0 rotating shortfall. V1.1 has no shortfall, so the field is
+   * reported as `null` and older values are simply ignored rather than reinterpreted.
+   */
+  void previousSessions
+
+  /**
+   * Draw a layer under its quota, its per-question dimension targets, and the family constraint.
+   *
+   * The family rule is **per dimension**: within one dimension, the most questions drawn from a
+   * single `familyId` is capped at `ceil(need / distinctFamilies)`. Two consequences matter.
+   *
+   *   - V1.0 behaviour is unchanged. There every `familyId` is unique, so the cap is 1 per family
+   *     and the rule reduces exactly to the old "no two same-family items in one paper".
+   *   - V1.1 becomes drawable at all. Its A layer deliberately shares a `familyId` across the items
+   *     of one sub-topic (all 8 A0 items are four families of two; A1's 12 items are six families
+   *     of two). A paper-wide "no family twice" rule makes A0's quota of 2 impossible; the cap
+   *     keeps the intent — do not lean on one sub-topic — without contradicting the pack.
+   *
+   * When the cap cannot be met the draw is retried with a seed derived from the attempt number, so
+   * the result stays a pure function of the seed. A successful return always carries exactly the
+   * requested number of items.
    */
   function drawLayer(
     layerName: string,
@@ -374,13 +350,46 @@ export function sampleQuestionSet({
     planDescription: string,
     needsEvenRemainder: boolean,
   ): Question[] {
-    const familyConstraint = hasSharedFamily(pool)
     const dimensions = [...plan.keys()]
-    const totalNeeded = [...plan.values()].reduce((a, b) => a + b, 0)
-    if (familyConstraint && availableFamilies(pool) < totalNeeded) {
-      throw new SamplerError(
-        `${layerName} 层要求在 ${totalNeeded} 题内不重复 familyId，但题库只有 ${availableFamilies(pool)} 个可用 family，无法满足 avoidSameFamily`,
-      )
+
+    /**
+     * Family rule: **within one dimension, each `familyId` is drawn at most once.**
+     *
+     * The A-layer quota is small (2 or 3 per dimension) and every A dimension has at least four
+     * distinct families, so this strictest reading is always satisfiable — and it is the reading
+     * that best matches what `avoidSameFamily` is for: a dimension should not lean on one sub-topic.
+     * V1.0 is unaffected, because there every `familyId` is unique, so the rule reduces to the old
+     * "no two same-family items in one paper".
+     *
+     * Returns `true` when the constraint applies at all (i.e. some family repeats in the pool).
+     */
+    const familyConstrained = hasSharedFamily(pool)
+
+    const drawDimension = (
+      candidates: readonly Question[],
+      need: number,
+      attemptRng: Rng,
+    ): Question[] => {
+      if (!familyConstrained) return attemptRng.sample(candidates, need)
+      const buckets = new Map<string, Question[]>()
+      for (const question of candidates) {
+        const key = question.familyId ?? `__nofamily__${question.id}`
+        const bucket = buckets.get(key) ?? []
+        bucket.push(question)
+        buckets.set(key, bucket)
+      }
+      const families = attemptRng.shuffle([...buckets.keys()])
+      if (families.length < need) {
+        throw new SamplerError(
+          `维度 ${candidates[0]?.dimension ?? '(未知)'} 需要 ${need} 题，但只有 ${families.length} 个 familyId；` +
+            `按"同一维度内每族只取一次"无法凑齐`,
+        )
+      }
+      // One per family, choosing which question inside the family at random.
+      return families
+        .slice(0, need)
+        .map((family) => attemptRng.pick(buckets.get(family) ?? []))
+        .filter((question): question is Question => question !== undefined)
     }
 
     for (let attempt = 0; attempt < 250; attempt += 1) {
@@ -395,7 +404,7 @@ export function sampleQuestionSet({
             `${layerName} 层维度 ${dimension} 需要 ${need} 题，题库只有 ${candidates.length} 题（${planDescription}）`,
           )
         }
-        taken.push(...attemptRng.sample(candidates, need))
+        taken.push(...drawDimension(candidates, need, attemptRng))
       }
 
       // Layer B remainder: balance the surplus across the dimensions that hold the fewest items.
@@ -428,11 +437,14 @@ export function sampleQuestionSet({
         }
       }
 
-      if (!familyConstraint || !hasFamilyConflict(taken)) return taken
+      // `drawDimension` enforces the family rule while drawing, so a paper that returns is already
+      // compliant. The loop therefore only needs one pass; the retry budget is kept for the case
+      // where the remainder slot below has to be re-rolled.
+      return taken
     }
 
     throw new SamplerError(
-      `${layerName} 层在 250 次重抽内仍无法同时满足配额与 avoidSameFamily 约束；请检查题库的 familyId 分布`,
+      `${layerName} 层在 250 次重抽内仍无法同时满足配额与 familyId 约束；请检查题库的 familyId 分布`,
     )
   }
 
@@ -472,7 +484,7 @@ export function sampleQuestionSet({
       'family_conflict_filtering',
       familyActive,
       familyActive
-        ? `avoidSameFamily 已在抽题过程中强制生效（A/B/C 分别 ${pickedA.length}/${pickedB.length}/${pickedC.length} 题）`
+        ? `familyId 每维上限已在抽题过程中强制生效（A/B/C 分别 ${pickedA.length}/${pickedB.length}/${pickedC.length} 题）`
         : '题库中每个 familyId 唯一，无同族题目可冲突',
     ),
   )
@@ -499,7 +511,9 @@ export function sampleQuestionSet({
     stage(
       'seeded_sampling',
       true,
-      `seed="${seed}"，mulberry32(FNV-1a)，A 层少抽维度 ${shortDimension}`,
+      `seed="${seed}"，mulberry32(FNV-1a)，A 层按题库声明的每维配额抽取（${[...planA.entries()]
+        .map(([dimension, count]) => `${dimension}=${count}`)
+        .join(' ')}）`,
     ),
   )
 
@@ -512,6 +526,29 @@ export function sampleQuestionSet({
   if (new Set(ids).size !== ids.length) {
     throw new SamplerError('抽题结果存在重复题目')
   }
+
+  /**
+   * Per-dimension quota check, after every stage has run.
+   *
+   * The plan is built before sampling, but the later stages (difficulty balance, family cap) can in
+   * principle move questions around. This assertion is what makes "the quota actually holds" a
+   * checked invariant instead of an assumption: without it, a stage that quietly drops an item shows
+   * up as a dimension with too few questions and nothing to say about why.
+   */
+  for (const layer of LAYERS) {
+    const plan = layer === 'theory_value' ? planA : layer === 'cooperation_behavior' ? planB : planC
+    const needsRemainder = layer === 'cooperation_behavior' && remainderB > 0
+    for (const [dimension, planned] of plan) {
+      const actual = ordered.filter((question) => question.dimension === dimension).length
+      const minimum = needsRemainder ? planned : planned
+      if (actual < minimum) {
+        throw new SamplerError(
+          `抽题结果不满足配额：维度 ${dimension} 计划至少 ${minimum} 题，实际 ${actual} 题（层级 ${layer}）`,
+        )
+      }
+    }
+  }
+
   const layerCounts = LAYERS.map(
     (layer) => `${layer}=${ordered.filter((question) => question.layer === layer).length}`,
   ).join(' ')
@@ -520,22 +557,67 @@ export function sampleQuestionSet({
   return {
     questionIds: ids,
     stages,
-    layerAShortDimension: shortDimension,
+    layerAShortDimension: null,
   }
 }
 
 export interface ShuffledOptionOrder {
   questionId: string
-  /** Option ids in the order they must be rendered. Author order is preserved inside. */
+  /** Option ids in the order they must be rendered. */
   optionIds: string[]
+  /** Which policy produced this order, so a reviewer can see why it was or was not reordered. */
+  policy: OptionOrderPolicy
 }
 
 /**
- * Option shuffle (§10 last stage, §12 reproducibility).
+ * Resolve the option order for one question (A-layer V1.1 `metadata.optionOrderPolicy`).
  *
- * Scoring is keyed by option `id`, never by position, so shuffling cannot corrupt a result.
- * The order is derived from `seed` + questionId only, so a restored session renders the same
- * paper it rendered before a refresh.
+ * The policy exists because the A layer now mixes question types whose options must not all be
+ * treated the same way:
+ *
+ *   fixed               — render exactly as authored. A0's option list *is* the answer set: the
+ *                         respondent picks a self-description, so reordering would change what the
+ *                         options mean relative to each other.
+ *   shuffle             — a knowledge item; free shuffle is safe and removes the positional tell.
+ *   preserve_or_reverse — the options form a semantic progression (A2/A3 run from one end of an
+ *                         axis to the other). Only the whole order or its whole reverse is allowed;
+ *                         an arbitrary permutation would destroy the progression. Which of the two
+ *                         is chosen is derived from the seed, so position bias is halved without
+ *                         ever scrambling the meaning.
+ *
+ * Absent means `shuffle`, which is the V1.0 behaviour, so older packs are unaffected.
+ */
+export function resolveOptionOrder(
+  question: Question,
+  seed: string,
+): { optionIds: string[]; policy: OptionOrderPolicy } {
+  const authored = question.options.map((option) => option.id)
+  const declared = question.metadata?.optionOrderPolicy
+  const policy: OptionOrderPolicy =
+    declared === 'fixed' || declared === 'shuffle' || declared === 'preserve_or_reverse'
+      ? declared
+      : 'shuffle'
+
+  if (policy === 'fixed') return { optionIds: authored, policy }
+
+  const rng = createRng(`${seed}::options::${question.id}`)
+
+  if (policy === 'preserve_or_reverse') {
+    // One bit decides forwards or backwards. Using the seeded stream keeps it reproducible.
+    const reverse = rng.nextInt(2) === 1
+    return { optionIds: reverse ? [...authored].reverse() : authored, policy }
+  }
+
+  return { optionIds: rng.shuffle(authored), policy }
+}
+
+/**
+ * Option order for a whole paper (§10 last stage, §12 reproducibility).
+ *
+ * Scoring is keyed by option `id`, never by position, so reordering cannot corrupt a result. The
+ * order is derived from `seed` + questionId only, so a restored session renders the same paper it
+ * rendered before a refresh — including the choice of forwards-vs-reversed for order-sensitive
+ * items.
  */
 export function shuffleOptions(
   pack: QuestionPack,
@@ -546,10 +628,7 @@ export function shuffleOptions(
   return questionIds.map((questionId) => {
     const question = byId.get(questionId)
     if (!question) throw new SamplerError(`题目 ${questionId} 不在题库 ${pack.id} 中`)
-    const rng = createRng(`${seed}::options::${questionId}`)
-    return {
-      questionId,
-      optionIds: rng.shuffle(question.options.map((option) => option.id)),
-    }
+    const resolved = resolveOptionOrder(question, seed)
+    return { questionId, optionIds: resolved.optionIds, policy: resolved.policy }
   })
 }

@@ -579,6 +579,104 @@ h2 {
   font-size: 0.85rem;
 }
 
+/*
+ * A-layer V1.1 profile section.
+ *
+ * Six parts inside one card. Neutral palette only (§58 forbids pass/fail colouring): a part that
+ * produces no number gets a plain text label, never a red mark or a zero-shaped badge.
+ */
+
+.a-layer-section {
+  border-left: 4px solid var(--accent);
+}
+
+.boundary-list {
+  margin: 10px 0 14px;
+  padding-left: 1.1em;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.a-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  background: var(--surface);
+  margin-top: 14px;
+}
+
+.a-card h3 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+
+.profile-no-score {
+  color: var(--muted);
+  font-size: 0.9rem;
+  border: 1px dashed var(--border);
+  border-radius: 999px;
+  padding: 1px 10px;
+  white-space: nowrap;
+}
+
+.low-sample {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  background: var(--notice);
+  border: 1px solid var(--notice-border);
+  border-radius: var(--radius);
+  font-size: 0.88rem;
+}
+
+.identity-list,
+.position-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.identity-list > li,
+.position-list > li {
+  border-left: 3px solid var(--accent-soft);
+  padding-left: 10px;
+}
+
+.identity-prompt,
+.position-prompt,
+.evidence-prompt {
+  margin: 0 0 4px;
+  font-size: 0.92rem;
+}
+
+.identity-quote {
+  margin: 0;
+  padding: 8px 12px;
+  background: var(--accent-soft);
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+}
+
+.position-topic {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  text-transform: none;
+}
+
+.position-choice,
+.evidence-answer {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+}
+
+.reflexivity-state {
+  margin: 4px 0 6px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
 .evidence {
   margin-top: 10px;
   font-size: 0.9rem;

@@ -16,6 +16,7 @@ import {
   exportFileName,
 } from '../../infrastructure/export/json-export.ts'
 import { getRepositories } from '../../infrastructure/storage/index.ts'
+import { ALayerSection } from './ALayerSection.tsx'
 import { ReportPanel } from './ReportPanel.tsx'
 
 const LAYER_TITLES: Record<Layer, string> = {
@@ -210,7 +211,21 @@ export function ResultPage() {
         </ul>
       </section>
 
-      {LAYERS.map((layer) => {
+      {/*
+        A-layer V1.1 renders as six section cards (self-declared identity, theory familiarity, two
+        sets of issue positions, practice orientation, reflexivity) rather than as four score rows.
+        The A layer is not a score vector and must not be shown as one (DSH-MIGRATION-V1.1 §5).
+        A result from an older pack has no `aLayerProfile` and falls through to the generic rows.
+      */}
+      {result.aLayerProfile ? (
+        <ALayerSection
+          profile={result.aLayerProfile}
+          session={session}
+          questionById={questionById}
+        />
+      ) : null}
+
+      {LAYERS.filter((layer) => layer !== 'theory_value' || !result.aLayerProfile).map((layer) => {
         const rows = result.dimensions.filter((dimension) => dimension.layer === layer)
         if (rows.length === 0) return null
         return (
@@ -218,57 +233,73 @@ export function ResultPage() {
             <h2>{LAYER_TITLES[layer]}</h2>
             <p className="hint">{LAYER_NOTES[layer]}</p>
             <ul className="profile-list">
-              {rows.map((dimension) => (
-                <li
-                  key={dimension.id}
-                  className="profile-row"
-                  data-testid={`dimension-${dimension.id}`}
-                >
-                  <div className="profile-head">
-                    <span className="profile-label">{dimension.label}</span>
-                    <span className="profile-score">{dimension.normalizedScore}</span>
-                  </div>
-                  <ProfileBar score={dimension.normalizedScore} />
-                  <div className="profile-meta">
-                    区间：{dimension.band} · 原始分 {dimension.rawScore}/{dimension.maxPossible} ·
-                    题量 {dimension.answeredItems}/{dimension.expectedItems} · 置信度{' '}
-                    {formatPercent(dimension.confidence)}
-                  </div>
-                  {(dimension.warnings ?? []).length > 0 && (
-                    <ul className="warning-list">
-                      {(dimension.warnings ?? []).map((warning) => (
-                        <li key={warning}>{warning}</li>
-                      ))}
-                    </ul>
-                  )}
-                  <details className="evidence">
-                    <summary>这个判断主要来自哪些题目？</summary>
-                    <ul>
-                      {dimension.evidenceQuestionIds.map((questionId) => {
-                        const question = questionById.get(questionId)
-                        const chosenOptionId = session.answers[questionId]
-                        const evidence = result.evidence.find(
-                          (item) => item.questionId === questionId,
-                        )
-                        return (
-                          <li key={questionId} data-testid={`evidence-${questionId}`}>
-                            <p className="evidence-prompt">
-                              <strong>{questionId}</strong>{' '}
-                              {question?.prompt ?? '(题目已不在题库中)'}
-                            </p>
-                            <p className="evidence-answer">
-                              你的作答：
-                              {chosenOptionId ? optionText(questionId, chosenOptionId) : '(未作答)'}
-                              {' · '}本维度信号：{evidence?.signal ?? '—'} /{' '}
-                              {evidence?.maxSignal ?? '—'}
-                            </p>
-                          </li>
-                        )
-                      })}
-                    </ul>
-                  </details>
-                </li>
-              ))}
+              {rows.map((dimension) => {
+                const numeric = (dimension.scoredItems ?? 1) > 0
+                return (
+                  <li
+                    key={dimension.id}
+                    className="profile-row"
+                    data-testid={`dimension-${dimension.id}`}
+                  >
+                    <div className="profile-head">
+                      <span className="profile-label">{dimension.label}</span>
+                      {numeric ? (
+                        <span className="profile-score">{dimension.normalizedScore}</span>
+                      ) : (
+                        <span className="profile-no-score">不产生分数</span>
+                      )}
+                    </div>
+                    {numeric && <ProfileBar score={dimension.normalizedScore} />}
+                    <div className="profile-meta">
+                      {numeric ? (
+                        <>
+                          区间：{dimension.band} · 原始分 {dimension.rawScore}/
+                          {dimension.maxPossible} · 题量 {dimension.answeredItems}/
+                          {dimension.expectedItems} · 置信度 {formatPercent(dimension.confidence)}
+                        </>
+                      ) : (
+                        <>本次作答 {dimension.answeredItems} 题（自我描述 / 描述性证据，不计分）</>
+                      )}
+                    </div>
+                    {(dimension.warnings ?? []).length > 0 && (
+                      <ul className="warning-list">
+                        {(dimension.warnings ?? []).map((warning) => (
+                          <li key={warning}>{warning}</li>
+                        ))}
+                      </ul>
+                    )}
+                    <details className="evidence">
+                      <summary>这个判断主要来自哪些题目？</summary>
+                      <ul>
+                        {dimension.evidenceQuestionIds.map((questionId) => {
+                          const question = questionById.get(questionId)
+                          const chosenOptionId = session.answers[questionId]
+                          const evidence = result.evidence.find(
+                            (item) => item.questionId === questionId,
+                          )
+                          return (
+                            <li key={questionId} data-testid={`evidence-${questionId}`}>
+                              <p className="evidence-prompt">
+                                <strong>{questionId}</strong>{' '}
+                                {question?.prompt ?? '(题目已不在题库中)'}
+                              </p>
+                              <p className="evidence-answer">
+                                你的作答：
+                                {chosenOptionId
+                                  ? optionText(questionId, chosenOptionId)
+                                  : '(未作答)'}
+                                {evidence && evidence.maxSignal > 0
+                                  ? ` · 本维度信号：${evidence.signal} / ${evidence.maxSignal}`
+                                  : ' · 该题不参与数值计分'}
+                              </p>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    </details>
+                  </li>
+                )
+              })}
             </ul>
           </section>
         )

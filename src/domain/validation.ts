@@ -1,5 +1,7 @@
 import {
+  A_LAYER_DIMENSIONS,
   LAYERS,
+  OPTION_ORDER_POLICIES,
   type Layer,
   type Question,
   type QuestionPack,
@@ -284,12 +286,20 @@ export function validateQuestionPack({
         }
   })
 
+  /**
+   * A-layer V1.1 adds a second kind of scoring key: `knowledge_accuracy` questions score against a
+   * *measurement* key (`theory_familiarity`) rather than repeating their own dimension id. Both are
+   * legal; anything else is not.
+   */
+  const measurementKeys = new Set(['theory_familiarity'])
+  const legalScoringKeys = new Set([...validDimensions, ...measurementKeys])
+
   check('illegal_scoring_key', () => {
     const bad: string[] = []
     for (const question of questions) {
       for (const option of question.options) {
         for (const key of Object.keys(option.scoring ?? {})) {
-          if (!validDimensions.has(key)) bad.push(`${question.id}/${option.id}:${key}`)
+          if (!legalScoringKeys.has(key)) bad.push(`${question.id}/${option.id}:${key}`)
         }
       }
     }
@@ -297,7 +307,7 @@ export function validateQuestionPack({
       ? {
           severity: 'pass',
           code: 'illegal_scoring_key',
-          message: 'scoring 键全部合法。',
+          message: `scoring 键全部合法（${validDimensions.size} 个维度键 + ${measurementKeys.size} 个测量键）。`,
           subjects: [],
         }
       : {
@@ -308,53 +318,83 @@ export function validateQuestionPack({
         }
   })
 
+  /**
+   * A question whose options carry no numeric signal is **not** missing data once A-layer V1.1 is in
+   * play: A0 is a categorical self-report and A2-A5 are descriptive evidence, and their empty
+   * `scoring` maps are the mechanism by which the engine knows not to invent a number.
+   *
+   * So scoring is required unless the question declares itself descriptive — which it does by
+   * putting `profileSignals` on its options instead.
+   */
+  const questionScoringIsOptional = (question: Question): boolean =>
+    question.options.some((option) => option.profileSignals !== undefined) ||
+    question.dimension === A_LAYER_DIMENSIONS.a0
+
   check('option_missing_scoring', () => {
     const bad: string[] = []
+    const intentionallyUnscored: string[] = []
     for (const question of questions) {
       for (const option of question.options) {
         const signals = Object.values(option.scoring ?? {})
-        if (signals.length === 0) bad.push(`${question.id}/${option.id}`)
+        if (signals.length > 0) continue
+        if (questionScoringIsOptional(question)) intentionallyUnscored.push(question.id)
+        else bad.push(`${question.id}/${option.id}`)
       }
     }
-    return bad.length === 0
-      ? {
-          severity: 'pass',
-          code: 'option_missing_scoring',
-          message: '每个选项都带 scoring。',
-          subjects: [],
-        }
-      : {
-          severity: 'error',
-          code: 'option_missing_scoring',
-          message: `缺少 scoring 的选项：${bad.slice(0, 20).join(', ')}`,
-          subjects: bad,
-        }
+    if (bad.length > 0) {
+      return {
+        severity: 'error',
+        code: 'option_missing_scoring',
+        message: `缺少 scoring 的选项：${bad.slice(0, 20).join(', ')}`,
+        subjects: bad,
+      }
+    }
+    const distinct = [...new Set(intentionallyUnscored)]
+    return {
+      severity: 'pass',
+      code: 'option_missing_scoring',
+      message:
+        distinct.length === 0
+          ? '每个选项都带 scoring。'
+          : `每个选项都带 scoring，或在 A 层按设计不参与数值计分（${distinct.length} 道：自我认同与描述性题目，空 scoring 是"不产生分数"的显式标记）。`,
+      subjects: [],
+    }
   })
 
   check('scoring_key_not_matching_own_dimension', () => {
     const bad: string[] = []
+    const byMeasurementKey: string[] = []
     for (const question of questions) {
       for (const option of question.options) {
         const keys = Object.keys(option.scoring ?? {})
-        if (keys.length === 1 && keys[0] !== question.dimension) {
-          bad.push(`${question.id}/${option.id}:${keys[0]}`)
-        }
         if (keys.length > 1) bad.push(`${question.id}/${option.id}:multi(${keys.join('|')})`)
+        const key = keys[0]
+        if (key === undefined) continue
+        if (key === question.dimension) continue
+        if (measurementKeys.has(key) && question.scoringMode === 'knowledge_accuracy') {
+          byMeasurementKey.push(`${question.id}:${key}`)
+          continue
+        }
+        bad.push(`${question.id}/${option.id}:${key}`)
       }
     }
-    return bad.length === 0
-      ? {
-          severity: 'pass',
-          code: 'scoring_key_not_matching_own_dimension',
-          message: '每题的选项只为一个维度打信号，且与题目 dimension 一致。',
-          subjects: [],
-        }
-      : {
-          severity: 'error',
-          code: 'scoring_key_not_matching_own_dimension',
-          message: `信号维度与题目维度不一致：${bad.slice(0, 20).join(', ')}`,
-          subjects: bad,
-        }
+    if (bad.length > 0) {
+      return {
+        severity: 'error',
+        code: 'scoring_key_not_matching_own_dimension',
+        message: `信号维度与题目维度不一致：${bad.slice(0, 20).join(', ')}`,
+        subjects: bad,
+      }
+    }
+    return {
+      severity: 'pass',
+      code: 'scoring_key_not_matching_own_dimension',
+      message:
+        byMeasurementKey.length === 0
+          ? '每题的选项只为一个维度打信号，且与题目 dimension 一致。'
+          : `每题的选项只为一个键打信号；其中 ${byMeasurementKey.length} 个选项按 knowledge_accuracy 打在测量键 theory_familiarity 上（A1）。`,
+      subjects: [],
+    }
   })
 
   check('illegal_role_signal_key', () => {
@@ -407,21 +447,36 @@ export function validateQuestionPack({
     const flat: string[] = []
     const floorAboveZero: string[] = []
     const keyTransparent: string[] = []
+    const descriptive: string[] = []
     for (const question of questions) {
-      const values = question.options.map((option) => Object.values(option.scoring ?? {})[0] ?? 0)
+      const raw = question.options.map((option) => Object.values(option.scoring ?? {})[0])
+      /**
+       * A question whose options all carry no numeric signal is a descriptive item, not a
+       * degenerate one. A2-A5 report positions and patterns; calling them "no discrimination"
+       * would be applying a scoring standard the author deliberately did not use.
+       */
+      if (raw.every((value) => value === undefined)) {
+        descriptive.push(question.id)
+        continue
+      }
+      const values = raw.map((value) => value ?? 0)
       if (new Set(values).size === 1) flat.push(question.id)
       if (Math.min(...values) > 0) floorAboveZero.push(`${question.id}(最低${Math.min(...values)})`)
       if (values.filter((value) => value === scoring.scale.maxPerQuestion).length === 1) {
         keyTransparent.push(question.id)
       }
     }
+    const scoredQuestions = questions.length - descriptive.length
     const out: Finding[] = []
     out.push(
       flat.length === 0
         ? {
             severity: 'pass',
             code: 'degenerate_score_spread',
-            message: '每题至少有两个不同分值。',
+            message:
+              descriptive.length === 0
+                ? '每题至少有两个不同分值。'
+                : `计分的 ${scoredQuestions} 道题每题至少有两个不同分值；另有 ${descriptive.length} 道题按设计不参与数值计分（自我认同与描述性题目）。`,
             subjects: [],
           }
         : {
@@ -447,29 +502,46 @@ export function validateQuestionPack({
           },
     )
     out.push(
-      keyTransparent.length === questions.length
+      keyTransparent.length === scoredQuestions && scoredQuestions > 0
         ? {
             severity: 'warning',
             code: 'transparent_single_key',
-            message: `全部 ${questions.length} 道题都恰好只有一个选项取到满分 ${scoring.scale.maxPerQuestion}，其余选项均 <= 1：表面效度上"只有一个明显好答案"。这是题库作者已知的设计取舍（源 README 第 76-83 行），依赖 optionShuffle 与跨题一致性缓解，不能当作已解决的测量问题。`,
+            message: `计分的 ${scoredQuestions} 道题全部恰好只有一个选项取到满分 ${scoring.scale.maxPerQuestion}，其余选项均 <= 1：表面效度上"只有一个明显好答案"。这是题库作者已知的设计取舍（源 README 第 76-83 行），依赖 optionShuffle 与跨题一致性缓解，不能当作已解决的测量问题。`,
             subjects: [],
           }
         : {
             severity: 'pass',
             code: 'transparent_single_key',
-            message: `${questions.length - keyTransparent.length} 道题有部分给分梯度。`,
+            message: `计分的 ${scoredQuestions} 道题中有 ${scoredQuestions - keyTransparent.length} 道有部分给分梯度。`,
             subjects: [],
           },
     )
+    if (descriptive.length > 0) {
+      out.push({
+        severity: 'pass',
+        code: 'descriptive_items_not_scored',
+        message: `${descriptive.length} 道 A 层题目按设计不产生数值分数（A0 自我认同 / A2–A5 描述性证据）：${descriptive.slice(0, 12).join(', ')}${descriptive.length > 12 ? ' …' : ''}`,
+        subjects: [],
+      })
+    }
     return out
   })
 
   check('key_position_tell', () => {
     const positions = new Map<string, number>()
+    let scored = 0
     for (const question of questions) {
-      const values = question.options.map((option) => Object.values(option.scoring ?? {})[0] ?? 0)
-      const index = values.indexOf(scoring.scale.maxPerQuestion)
+      /**
+       * Only questions that actually have a "full mark" participate. A descriptive A-layer item has
+       * no scored options at all, so treating its position 0 as a keyed answer would invent a tell
+       * that does not exist and dilute the real distribution.
+       */
+      const values = question.options.map((option) => Object.values(option.scoring ?? {})[0])
+      if (values.every((value) => value === undefined)) continue
+      const numeric = values.map((value) => value ?? 0)
+      const index = numeric.indexOf(scoring.scale.maxPerQuestion)
       if (index < 0) continue
+      scored += 1
       const label = String.fromCharCode(65 + index)
       positions.set(label, (positions.get(label) ?? 0) + 1)
     }
@@ -477,18 +549,18 @@ export function validateQuestionPack({
       .sort((a, b) => b[1] - a[1])
       .map(([k, v]) => `${k}=${v}`)
     const top = [...positions.entries()].sort((a, b) => b[1] - a[1])[0]
-    const share = top ? top[1] / questions.length : 0
+    const share = top && scored > 0 ? top[1] / scored : 0
     return share > 0.5
       ? {
           severity: 'warning',
           code: 'key_position_tell',
-          message: `满分选项的位置分布高度不均（${summary.join(', ')}，最高位占 ${(share * 100).toFixed(1)}%）。运行时必须开启 optionShuffle，且人工审阅版题库（md）会直接暴露答案位置。`,
+          message: `在 ${scored} 道计分题中，满分选项的位置分布高度不均（${summary.join(', ')}，最高位占 ${(share * 100).toFixed(1)}%）。运行时必须按题目策略处理选项顺序，且人工审阅版题库（md）会直接暴露答案位置。`,
           subjects: [],
         }
       : {
           severity: 'pass',
           code: 'key_position_tell',
-          message: `满分选项位置分布：${summary.join(', ')}`,
+          message: `在 ${scored} 道计分题中，满分选项位置分布：${summary.join(', ')}`,
           subjects: [],
         }
   })
@@ -871,21 +943,65 @@ export function validateQuestionPack({
         subjects: [],
       }
     }
-    const overfull = conflicting.filter(([, ids]) => ids.length > 3)
+    /**
+     * The rule is now **per dimension**, not per paper.
+     *
+     * A-layer V1.1 deliberately groups the items of one sub-topic under a shared `familyId` (all
+     * eight A0 items are four families of two). A paper-wide "no family twice" rule would make A0's
+     * quota of two impossible; the engine therefore caps how many items one dimension may take from
+     * a single family at `ceil(need / distinctFamilies)`. The validator checks the same rule, which
+     * is what actually has to hold.
+     */
+    const perDimension = new Map<string, Map<string, number>>()
+    for (const question of questions) {
+      if (!question.familyId) continue
+      const byFamily = perDimension.get(question.dimension) ?? new Map<string, number>()
+      byFamily.set(question.familyId, (byFamily.get(question.familyId) ?? 0) + 1)
+      perDimension.set(question.dimension, byFamily)
+    }
+
+    /**
+     * The cap the engine actually enforces, which is deliberately the **strictest** rule the bank
+     * can satisfy: never draw the same `familyId` twice inside one dimension.
+     *
+     * The A-layer quota is small (2 or 3 per dimension) and every dimension has at least four
+     * distinct families, so "at most one per family" is always achievable, and it is the reading
+     * that best matches the intent of `avoidSameFamily` — a dimension should not lean on one
+     * sub-topic. The validator checks that this stricter rule remains satisfiable, so a future pack
+     * cannot shrink a dimension's family pool below its quota without the check failing.
+     */
+    const subQuotaA = pack.assessmentPolicy.subQuota?.theory_value ?? {}
+    const familyCountPerDimension = new Map<string, number>()
+    for (const [dimension, bank] of banksByDimension) {
+      const families = new Set(
+        bank.map((question) => question.familyId).filter((id): id is string => Boolean(id)),
+      )
+      familyCountPerDimension.set(dimension, families.size || 1)
+    }
+
+    const overfull: string[] = []
+    for (const dimension of new Set(questions.map((question) => question.dimension))) {
+      const need = subQuotaA[dimension] ?? 1
+      const familyCount = familyCountPerDimension.get(dimension) ?? 1
+      if (need > familyCount) {
+        overfull.push(
+          `${dimension}(需 ${need} 题但只有 ${familyCount} 个 family，无法做到每族仅取一次)`,
+        )
+      }
+    }
+
     return overfull.length === 0
       ? {
           severity: 'pass',
           code: 'family_conflict',
-          message: `${conflicting.length} 个 family 含多题，抽样时需避免同族重复，均已 <= 3 题，可以错开。`,
+          message: `${conflicting.length} 个 family 含多题；抽样按"同一维度内每个 familyId 只取一次"限制，各维 family 数均足以满足配额。`,
           subjects: conflicting.map(([familyId]) => familyId),
         }
       : {
           severity: 'error',
           code: 'family_conflict',
-          message: `以下 family 含超过 3 道题，若同族题必须错开则可能凑不满配额：${overfull
-            .map(([familyId, ids]) => `${familyId}(${ids.length})`)
-            .join(', ')}`,
-          subjects: overfull.map(([familyId]) => familyId),
+          message: `以下维度无法满足"同一维度内每族只取一次"，可能凑不满配额：${overfull.join('；')}`,
+          subjects: overfull,
         }
   })
 
@@ -903,6 +1019,324 @@ export function validateQuestionPack({
           code: 'reverse_items',
           message: `存在 ${reverseCount} 道反向题，反向题冲突检测阶段处于激活状态。`,
           subjects: [],
+        }
+  })
+
+  // --- A-layer V1.1 structural rules ---------------------------------------
+  // These encode the migration requirements directly, so a future pack cannot quietly drop one:
+  // strict per-dimension A quota, A0 as self-report only, balanced A1 answer positions, option
+  // ordering that respects the declared policy, and the removal of the stale CG05-CG08 mappings.
+
+  check('a_layer_quota_shape', () => {
+    const sub = pack.assessmentPolicy.subQuota?.theory_value
+    const declared = Object.keys(scoring.layerA.dimensions)
+    if (!sub) {
+      return {
+        severity: 'inactive',
+        code: 'a_layer_quota_shape',
+        message: '题库未声明 A 层 subQuota，跳过 A 层配额形状检查。',
+        subjects: [],
+      }
+    }
+    const problems: string[] = []
+    for (const dimension of declared) {
+      const need = sub[dimension]
+      if (need === undefined) {
+        problems.push(`维度 ${dimension} 未声明单次配额`)
+        continue
+      }
+      const pool = banksByDimension.get(dimension)?.length ?? 0
+      if (pool === 0) problems.push(`维度 ${dimension} 在题库中没有题目`)
+      else if (pool < need) problems.push(`维度 ${dimension} 需要 ${need} 题，题库只有 ${pool} 题`)
+    }
+    const unexpected = Object.keys(sub).filter((dimension) => !declared.includes(dimension))
+    if (unexpected.length > 0) {
+      problems.push(`subQuota 声明了评分模型未定义的维度：${unexpected.join(', ')}`)
+    }
+    const total = Object.values(sub).reduce((a, b) => a + b, 0)
+    if (total !== (pack.assessmentPolicy.quota.theory_value ?? 0)) {
+      problems.push(
+        `A 层每维配额之和 ${total} != A 层配额 ${pack.assessmentPolicy.quota.theory_value}`,
+      )
+    }
+    return problems.length === 0
+      ? {
+          severity: 'pass',
+          code: 'a_layer_quota_shape',
+          message: `A 层 ${declared.length} 个维度配额形状正确：${declared
+            .map((dimension) => `${dimension}=${sub[dimension]}`)
+            .join(' ')}（合计 ${total}）`,
+          subjects: [],
+        }
+      : {
+          severity: 'error',
+          code: 'a_layer_quota_shape',
+          message: `A 层配额形状有问题：${problems.join('；')}`,
+          subjects: problems,
+        }
+  })
+
+  check('a0_self_report_only', () => {
+    const a0 = questions.filter((question) => question.dimension === A_LAYER_DIMENSIONS.a0)
+    if (a0.length === 0) {
+      return {
+        severity: 'inactive',
+        code: 'a0_self_report_only',
+        message: '题库没有 A0 自我认同题目，跳过自我申报检查。',
+        subjects: [],
+      }
+    }
+    const problems: string[] = []
+    for (const question of a0) {
+      if (question.scenarioType !== 'self_report') {
+        problems.push(
+          `${question.id} 的 scenarioType 是 ${question.scenarioType}，应为 self_report`,
+        )
+      }
+      for (const option of question.options) {
+        if (option.selfReportCategory === undefined) {
+          problems.push(`${question.id}/${option.id} 缺少 selfReportCategory`)
+        }
+        if (Object.keys(option.scoring ?? {}).length > 0) {
+          problems.push(`${question.id}/${option.id} 带 scoring，A0 不参与数值计分`)
+        }
+      }
+      const categories = question.options
+        .map((option) => option.selfReportCategory)
+        .filter((value): value is string => value !== undefined)
+      if (new Set(categories).size !== categories.length) {
+        problems.push(`${question.id} 的 selfReportCategory 有重复`)
+      }
+    }
+    return problems.length === 0
+      ? {
+          severity: 'pass',
+          code: 'a0_self_report_only',
+          message: `A0 共 ${a0.length} 题，全部为 self_report、全部带唯一 selfReportCategory、全部不参与数值计分。`,
+          subjects: [],
+        }
+      : {
+          severity: 'error',
+          code: 'a0_self_report_only',
+          message: `A0 自我申报规则被破坏：${problems.slice(0, 10).join('；')}`,
+          subjects: problems,
+        }
+  })
+
+  check('a1_answer_position_balance', () => {
+    const a1 = questions.filter(
+      (question) =>
+        question.layer === 'theory_value' && question.scoringMode === 'knowledge_accuracy',
+    )
+    if (a1.length === 0) {
+      return {
+        severity: 'inactive',
+        code: 'a1_answer_position_balance',
+        message: '题库没有 knowledge_accuracy 题目，跳过正确答案位置检查。',
+        subjects: [],
+      }
+    }
+    const positions = new Map<string, number>()
+    const problems: string[] = []
+    for (const question of a1) {
+      const values = question.options.map((option) => Object.values(option.scoring ?? {})[0] ?? 0)
+      const best = Math.max(...values)
+      const bestIndexes = values
+        .map((value, index) => (value === best ? index : -1))
+        .filter((index) => index >= 0)
+      if (bestIndexes.length !== 1) {
+        problems.push(`${question.id} 的正确答案不是唯一（${bestIndexes.length} 个满分选项）`)
+        continue
+      }
+      const label = String.fromCharCode(65 + (bestIndexes[0] ?? 0))
+      positions.set(label, (positions.get(label) ?? 0) + 1)
+    }
+    if (problems.length > 0) {
+      return {
+        severity: 'error',
+        code: 'a1_answer_position_balance',
+        message: problems.join('；'),
+        subjects: problems,
+      }
+    }
+    const spread = [...positions.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1))
+    const ideal = a1.length / 4
+    const unbalanced = spread.some(
+      ([, count]) => Math.abs(count - ideal) > Math.max(1, ideal * 0.5),
+    )
+    return unbalanced
+      ? {
+          severity: 'warning',
+          code: 'a1_answer_position_balance',
+          message: `A1 正确答案位置分布不均：${spread
+            .map(([label, count]) => `${label}=${count}`)
+            .join(
+              ' ',
+            )}（共 ${a1.length} 题，理想每位置 ${ideal}）。位置打乱可缓解，但建议人工平衡。`,
+          subjects: [],
+        }
+      : {
+          severity: 'pass',
+          code: 'a1_answer_position_balance',
+          message: `A1 正确答案位置分布：${spread
+            .map(([label, count]) => `${label}=${count}`)
+            .join(' ')}（共 ${a1.length} 题）`,
+          subjects: [],
+        }
+  })
+
+  check('option_order_policy_respected', () => {
+    const problems: string[] = []
+    const counts = new Map<string, number>()
+    for (const question of questions) {
+      const raw = question.metadata?.optionOrderPolicy
+      const policy = raw === undefined ? 'shuffle(default)' : String(raw)
+      counts.set(policy, (counts.get(policy) ?? 0) + 1)
+      if (raw !== undefined && !OPTION_ORDER_POLICIES.includes(raw as never)) {
+        problems.push(`${question.id} 的 optionOrderPolicy 非法：${String(raw)}`)
+      }
+      if (
+        raw === 'preserve_or_reverse' &&
+        question.layer === 'theory_value' &&
+        pack.assessmentPolicy.sampling?.optionShuffle === true
+      ) {
+        problems.push(`${question.id} 需要保序/整体反转，但题库级 optionShuffle=true 会打乱它`)
+      }
+    }
+    return problems.length === 0
+      ? {
+          severity: 'pass',
+          code: 'option_order_policy_respected',
+          message: `选项顺序策略合法：${[...counts.entries()]
+            .map(([policy, count]) => `${policy}=${count}`)
+            .join(' ')}`,
+          subjects: [],
+        }
+      : {
+          severity: 'error',
+          code: 'option_order_policy_respected',
+          message: `选项顺序策略有问题：${problems.slice(0, 10).join('；')}`,
+          subjects: problems,
+        }
+  })
+
+  check('stale_a_consistency_groups_removed', () => {
+    const stale = scoring.confidence.consistencyGroups
+      .filter((group) =>
+        group.questions.some((questionId) => {
+          const question = questionById.get(questionId)
+          return question?.layer === 'theory_value'
+        }),
+      )
+      .map((group) => group.id)
+    const removed = ['CG05', 'CG06', 'CG07', 'CG08'].filter(
+      (id) => !scoring.confidence.consistencyGroups.some((group) => group.id === id),
+    )
+    if (stale.length > 0) {
+      return {
+        severity: 'error',
+        code: 'stale_a_consistency_groups_removed',
+        message: `以下一致性组仍引用 A 层题目，V1.1 后这些语义映射已失效：${stale.join(', ')}。A001 等 ID 被复用于新题，沿用旧映射会把新题按旧语义比较。`,
+        subjects: stale,
+      }
+    }
+    return {
+      severity: 'pass',
+      code: 'stale_a_consistency_groups_removed',
+      message:
+        removed.length > 0
+          ? `一致性组不含 A 层题目（已移除旧映射：${removed.join(', ')}）。`
+          : '一致性组不含 A 层题目。',
+      subjects: [],
+    }
+  })
+
+  check('a_layer_boundary_text', () => {
+    const aLayerQuestions = questions.filter((question) => question.layer === 'theory_value')
+    if (aLayerQuestions.length === 0) {
+      return {
+        severity: 'inactive',
+        code: 'a_layer_boundary_text',
+        message: '题库没有 A 层题目，跳过 A 层措辞扫描。',
+        subjects: [],
+      }
+    }
+    const declared = new Set([
+      ...(roleModel.forbiddenLanguage ?? []),
+      ...REQUIRED_FORBIDDEN_LANGUAGE,
+    ])
+    const hits: string[] = []
+    for (const question of aLayerQuestions) {
+      const haystack = [question.prompt, ...question.options.map((option) => option.text)].join(
+        '\n',
+      )
+      for (const phrase of declared) {
+        if (haystack.includes(phrase)) hits.push(`${question.id}:${phrase}`)
+      }
+    }
+    return hits.length === 0
+      ? {
+          severity: 'pass',
+          code: 'a_layer_boundary_text',
+          message: `A 层 ${aLayerQuestions.length} 题的题干与选项未出现任何禁用输出语。`,
+          subjects: [],
+        }
+      : {
+          severity: 'warning',
+          code: 'a_layer_boundary_text',
+          message: `A 层题干或选项出现禁用输出语（需人工确认是"讨论对象"还是"评价他人"）：${hits
+            .slice(0, 20)
+            .join(', ')}`,
+          subjects: hits,
+        }
+  })
+
+  check('a_layer_scoring_policy_consistency', () => {
+    const policy = scoring.layerAProfilePolicy
+    const aLayerDimensions = Object.keys(scoring.layerA.dimensions)
+    const isV11 = aLayerDimensions.includes(A_LAYER_DIMENSIONS.a0)
+    if (!isV11) {
+      return {
+        severity: 'inactive',
+        code: 'a_layer_scoring_policy_consistency',
+        message: '当前评分模型的 A 层不是 V1.1 六维结构，跳过 A 层呈现政策检查。',
+        subjects: [],
+      }
+    }
+    const problems: string[] = []
+    if (!policy) problems.push('scoring-v1.1 缺少 layerAProfilePolicy')
+    else {
+      for (const dimension of aLayerDimensions) {
+        if (policy.displayPolicy[dimension] === undefined) {
+          problems.push(`layerAProfilePolicy.displayPolicy 未覆盖维度 ${dimension}`)
+        }
+      }
+      if (policy.exploratorySignals.userFacingByDefault) {
+        problems.push(
+          'exploratorySignals.userFacingByDefault 为 true，会把探索性轴信号直接呈现给用户',
+        )
+      }
+      if (policy.forbiddenOutputs.length === 0) problems.push('forbiddenOutputs 为空')
+    }
+    if (scoring.layerA.useInRoleFit) problems.push('layerA.useInRoleFit 为 true')
+    if (scoring.layerA.useForAdmissionDecision) {
+      problems.push('layerA.useForAdmissionDecision 为 true')
+    }
+    if (scoring.layerA.aggregateTotalScore !== false) {
+      problems.push('layerA.aggregateTotalScore 不是 false，A 层可能被求和')
+    }
+    return problems.length === 0
+      ? {
+          severity: 'pass',
+          code: 'a_layer_scoring_policy_consistency',
+          message: `A 层呈现政策自洽：${aLayerDimensions.length} 维均有 displayPolicy，探索性信号不面向用户，禁止输出清单 ${policy?.forbiddenOutputs.length ?? 0} 条，不进入 role-fit，不生成总分。`,
+          subjects: [],
+        }
+      : {
+          severity: 'error',
+          code: 'a_layer_scoring_policy_consistency',
+          message: `A 层呈现政策有问题：${problems.join('；')}`,
+          subjects: problems,
         }
   })
 

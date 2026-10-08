@@ -1,0 +1,33 @@
+{
+  "a_total": 60,
+  "a_dimension_counts": {
+    "A0_declared_identity": 8,
+    "A1_theory_structure": 12,
+    "A2_political_economy": 12,
+    "A3_social_political": 12,
+    "A4_practice_orientation": 8,
+    "A5_reflexivity": 8
+  },
+  "a_quota_sum": 15,
+  "full_total": 120,
+  "full_layer_counts": {
+    "theory_value": 60,
+    "cooperation_behavior": 36,
+    "skill_role": 24
+  },
+  "unique_full_ids": true,
+  "all_a_four_options": true,
+  "a1_correct_position_distribution": {
+    "B": 3,
+    "A": 3,
+    "C": 3,
+    "D": 3
+  },
+  "v1_1_consistency_groups": [
+    "CG01",
+    "CG02",
+    "CG03",
+    "CG04"
+  ],
+  "role_model_unchanged": true
+}

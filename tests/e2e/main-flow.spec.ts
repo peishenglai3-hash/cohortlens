@@ -61,7 +61,28 @@ test('完整主流程：抽 30 题 → 逐题作答 → 中途刷新不丢进度
 
   // Result page: a structured result, not a verdict.
   await expect(page).toHaveURL(/#\/result/)
-  await expect(page.getByTestId('layer-theory_value')).toBeVisible()
+  /**
+   * A-layer V1.1 renders the theory layer as six section cards instead of a `layer-theory_value`
+   * score block, so the assertion names the cards themselves. That is the point of the change: an
+   * A-layer result must not be laid out as a score row.
+   */
+  await expect(page.getByTestId('a-layer-section')).toBeVisible()
+  for (const card of [
+    'a-card-A0_declared_identity',
+    'a-card-A1_theory_structure',
+    'a-card-A2_political_economy',
+    'a-card-A3_social_political',
+    'a-card-A4_practice_orientation',
+    'a-card-A5_reflexivity',
+  ]) {
+    await expect(page.getByTestId(card), card).toBeVisible()
+  }
+  await expect(page.getByTestId('a-layer-boundaries')).toBeVisible()
+  // A0 shows the respondent's own words and no number beside them.
+  await expect(page.getByTestId('a-card-A0_declared_identity')).toContainText('系统原样呈现')
+  await expect(page.getByTestId('a1-low-sample')).toBeVisible()
+  await expect(page.getByTestId('a5-state')).toBeVisible()
+  // B and C remain ordinary score sections.
   await expect(page.getByTestId('layer-cooperation_behavior')).toBeVisible()
   await expect(page.getByTestId('layer-skill_role')).toBeVisible()
   await expect(page.getByTestId('role-fit-section')).toBeVisible()
@@ -93,11 +114,18 @@ test('证据可以展开：每个维度能回看到题目与自己的作答', as
   await answerAllQuestions(page)
   await expect(page).toHaveURL(/#\/result/)
 
+  // The first `.evidence` block on the page now belongs to the A5 reflexivity card, which reports
+  // "not scored" instead of a signal pair. Both phrasings are checked so the assertion stays true
+  // wherever the A-layer section places its evidence.
   const firstEvidence = page.locator('.evidence').first()
   await firstEvidence.locator('summary').click()
   await expect(firstEvidence).toHaveAttribute('open', '')
   await expect(firstEvidence.locator('li').first()).toContainText('你的作答')
-  await expect(firstEvidence.locator('li').first()).toContainText('本维度信号')
+
+  // The B/C score sections must still show a signal pair against their items.
+  const scoreEvidence = page.locator('[data-testid="layer-cooperation_behavior"] .evidence').first()
+  await scoreEvidence.locator('summary').click()
+  await expect(scoreEvidence.locator('li').first()).toContainText('本维度信号')
 })
 
 test('刷新结果页后仍然能看到同一份结果（结果已落盘）', async ({ page }) => {
@@ -133,7 +161,9 @@ test('历史记录包含刚完成的结果，并能重新打开', async ({ page 
 
   await openHistory(page)
   await expect(page.getByTestId('history-status').first()).toHaveText('已完成')
-  await expect(page.getByTestId('history-pack-version').first()).toContainText('cohortlens-cn-v1')
+  await expect(page.getByTestId('history-pack-version').first()).toContainText(
+    'cohortlens-question-pack-v1.1',
+  )
   await expect(page.getByTestId('history-delete').first()).toBeVisible()
 
   await page.getByTestId('history-open').first().click()
@@ -222,4 +252,82 @@ test('JSON 导出会真的产生一个不含 API Key 的文件', async ({ page }
   expect(text).not.toContain('Bearer')
 
   await expect(page.getByTestId('export-message')).toContainText('已导出')
+})
+
+/**
+ * A-layer V1.1 on a real browser.
+ *
+ * The unit suite proves the profile *object* is right; this proves the *page* does not turn it back
+ * into a scoreboard. The three claims worth an end-to-end test are the ones a user could actually be
+ * misled by: A0 showing a number, the A layer being weighed into role fit, or the six parts being
+ * summed somewhere on screen.
+ */
+test('A 层按六张分区卡呈现，且自我认同不出现分数', async ({ page }) => {
+  await openAssessment(page)
+  await answerAllQuestions(page)
+  await expect(page).toHaveURL(/#\/result/)
+
+  const aSection = page.getByTestId('a-layer-section')
+  await expect(aSection).toBeVisible()
+  await expect(aSection).toContainText('不参与角色适配')
+
+  // A0: the respondent's own words, quoted. It must contain the chosen option's text and must not
+  // present a numeric score anywhere inside the card.
+  const a0Card = page.getByTestId('a-card-A0_declared_identity')
+  await expect(a0Card.locator('blockquote')).toHaveCount(2)
+  await expect(a0Card).toContainText('系统原样呈现')
+  await expect(a0Card.locator('.profile-score')).toHaveCount(0)
+  await expect(a0Card).not.toContainText('/ 100')
+
+  // A1: a number is allowed, but the low-sample notice must be right next to it.
+  const a1Card = page.getByTestId('a-card-A1_theory_structure')
+  await expect(a1Card.getByTestId('a1-score')).toBeVisible()
+  await expect(a1Card.getByTestId('a1-low-sample')).toContainText('低精度')
+
+  // A2-A4: cards, no scores.
+  for (const card of [
+    'a-card-A2_political_economy',
+    'a-card-A3_social_political',
+    'a-card-A4_practice_orientation',
+  ]) {
+    await expect(page.getByTestId(card), card).toContainText('不折算成分数')
+    await expect(page.getByTestId(card).locator('.profile-score'), card).toHaveCount(0)
+  }
+
+  // A5: a state label, never a bare number without one.
+  const a5State = page.getByTestId('a5-state')
+  await expect(a5State).toBeVisible()
+  await expect(a5State).toHaveText(/方向相对一致|方向不一致|材料不足/)
+})
+
+test('角色适配区不含任何 A 层维度', async ({ page }) => {
+  await openAssessment(page)
+  await answerAllQuestions(page)
+  await expect(page).toHaveURL(/#\/result/)
+
+  const roleFit = page.getByTestId('role-fit-section')
+  await expect(roleFit).toBeVisible()
+  const roleFitText = await roleFit.innerText()
+  for (const dimension of [
+    'A0_declared_identity',
+    'A1_theory_structure',
+    'A2_political_economy',
+    'A3_social_political',
+    'A4_practice_orientation',
+    'A5_reflexivity',
+  ]) {
+    expect(roleFitText, dimension).not.toContain(dimension)
+  }
+  // And nothing on the page may present a combined A-layer number. The product's own disclaimer
+  // legitimately *names* the thing it refuses to produce, so the scan skips negative statements —
+  // the same scoping the unit-level boundary checks use.
+  const pageText = await page.locator('main').innerText()
+  const claimLines = pageText
+    .split('\n')
+    .filter((line) => !/不生成|不得|不能相加|不输出|不是/.test(line))
+  for (const forbidden of ['政治—理论总分', '政治倾向评分', '意识形态评分', '立场指数']) {
+    for (const line of claimLines) {
+      expect(line, `${forbidden} in: ${line}`).not.toContain(forbidden)
+    }
+  }
 })

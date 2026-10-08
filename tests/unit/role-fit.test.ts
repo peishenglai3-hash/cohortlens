@@ -81,15 +81,16 @@ describe('role fit — layer A is structurally excluded (Engineering Bible §19)
   })
 
   it('reports a layer-A weight if one is ever introduced', () => {
+    // The dimension id comes from the active scoring model rather than being hard-coded, so this
+    // keeps working across A-layer revisions (V1.0's four macro dimensions, V1.1's six).
+    const layerADimension =
+      Object.keys(bundle.scoring.layerA.dimensions)[0] ?? 'A0_declared_identity'
     const tampered = {
       ...bundle.roleModel,
-      roles: [
-        { id: 'y', name: 'Y', weights: { conceptual_understanding: 1 } },
-        ...bundle.roleModel.roles,
-      ],
+      roles: [{ id: 'y', name: 'Y', weights: { [layerADimension]: 1 } }, ...bundle.roleModel.roles],
     }
     const audit = auditRoleModel(tampered, bundle.scoring)
-    expect(audit.layerAWeightViolations).toEqual(['y:conceptual_understanding'])
+    expect(audit.layerAWeightViolations).toEqual([`y:${layerADimension}`])
   })
 })
 

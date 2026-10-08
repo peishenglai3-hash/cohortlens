@@ -118,6 +118,11 @@ export interface ReportPayload {
     questionBankLanguage: string
   }
   dimensions: ReportPayloadDimension[]
+  /**
+   * A-layer V1.1 six-part profile. Absent when the result came from an older pack, which had four
+   * score dimensions instead.
+   */
+  aLayer?: ReportPayloadALayer
   roleFits: ReportPayloadRole[]
   /** Pre-computed phrasing the engine already produced, so the model does not invent new numbers. */
   strengths: string[]
@@ -145,6 +150,52 @@ export interface ReportPayloadDimension {
   confidence: number
   /** Stable question ids only — never the respondent's chosen option text (§60). */
   evidenceQuestionIds: string[]
+  /**
+   * A-layer V1.1. `categorical` and `descriptive` dimensions have **no** score: the model is told
+   * that explicitly so it cannot treat `score: 0` as "scored badly".
+   */
+  scoringKind?: 'numeric' | 'knowledge' | 'categorical' | 'descriptive'
+  /** How many of `items` actually carried a numeric signal. */
+  scoredItems?: number
+}
+
+/**
+ * A-layer profile as sent to the model — A-layer V1.1.
+ *
+ * The A layer is the first place where the respondent's own political-theoretical material could
+ * reach a third-party model, so what is sent — and what is deliberately withheld — matters.
+ *
+ * Sent: the controlled vocabulary that describes *what the parts are* — which categories the person
+ * chose for A0, the topic label of each A2-A4 item, A1's correct/answered counts, A5's state.
+ *
+ * Withheld: the respondent's chosen option **text** for every item, including A2-A5, and the
+ * question prompts. Engineering Bible §60 says the payload never carries the answer sheet, and a
+ * card's chosen position *is* answer-sheet content. The result page shows those positions to the
+ * respondent; the model is only asked to describe the profile's shape and its limits.
+ *
+ * `measuredItems` therefore carries counts, not answers, and the boundary list travels with the
+ * payload so the model is told the same limits the UI states.
+ */
+export interface ReportPayloadALayer {
+  displayPolicy: Record<string, string>
+  /** A0: the self-declared categories, verbatim. Never inferred, never re-scored. */
+  declaredIdentity: { questionId: string; topic: string; selectedCategory: string }[]
+  theoryFamiliarity: {
+    correct: number
+    answered: number
+    normalizedScore: number
+    band: string
+    lowSample: boolean
+  } | null
+  /** A2-A4: how many items each part rests on, and which topics they cover. No chosen text. */
+  measuredItems: {
+    dimension: string
+    itemCount: number
+    topics: string[]
+    questionIds: string[]
+  }[]
+  reflexivity: { state: string; confidence: number; evidenceQuestionIds: string[] }
+  boundaries: string[]
 }
 
 export interface ReportPayloadRole {

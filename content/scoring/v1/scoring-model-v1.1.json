@@ -1,0 +1,172 @@
+{
+  "id": "scoring-v1.1",
+  "version": "1.1.0",
+  "scale": {
+    "min": 0,
+    "maxPerQuestion": 3,
+    "normalizedMin": 0,
+    "normalizedMax": 100
+  },
+  "layerA": {
+    "name": "思想认同与政治—理论画像",
+    "dimensions": {
+      "A0_declared_identity": "自我声明的政治—理论认同",
+      "A1_theory_structure": "理论熟悉与概念理解",
+      "A2_political_economy": "政治经济议题立场",
+      "A3_social_political": "社会—政治议题立场",
+      "A4_practice_orientation": "实践参与取向",
+      "A5_reflexivity": "反身性与修正方式"
+    },
+    "displayPolicy": {
+      "A0_declared_identity": "categorical_self_report",
+      "A1_theory_structure": "knowledge_familiarity_low_sample",
+      "A2_political_economy": "issue_position_cards",
+      "A3_social_political": "issue_position_cards",
+      "A4_practice_orientation": "practice_pattern_cards",
+      "A5_reflexivity": "qualitative_summary_with_evidence"
+    },
+    "useInRoleFit": false,
+    "useForAdmissionDecision": false,
+    "aggregateTotalScore": false
+  },
+  "layerB": {
+    "name": "合作与行为",
+    "dimensions": {
+      "responsibility": "责任承担",
+      "communication": "沟通",
+      "conflict_handling": "冲突处理",
+      "initiative": "主动性",
+      "reliability": "可靠性",
+      "reflection": "反思与适应"
+    }
+  },
+  "layerC": {
+    "name": "技能与角色",
+    "dimensions": {
+      "research_skill": "研究能力",
+      "execution_skill": "执行能力",
+      "coordination_skill": "协调能力",
+      "organization_skill": "组织能力",
+      "technical_skill": "技术支持",
+      "communication_skill": "传播表达"
+    }
+  },
+  "normalization": "dimension_score = round(sum(answer_score) / max_possible_for_answered_items * 100)",
+  "confidence": {
+    "base": "answered_items / expected_items",
+    "consistencyGroups": [
+      {
+        "id": "CG01",
+        "questions": [
+          "B001",
+          "B027"
+        ],
+        "type": "directional_alignment",
+        "note": "deadline/estimate handling"
+      },
+      {
+        "id": "CG02",
+        "questions": [
+          "B007",
+          "B014"
+        ],
+        "type": "directional_alignment",
+        "note": "disagreement/criticism handling"
+      },
+      {
+        "id": "CG03",
+        "questions": [
+          "B019",
+          "B023"
+        ],
+        "type": "directional_alignment",
+        "note": "initiative under ambiguity"
+      },
+      {
+        "id": "CG04",
+        "questions": [
+          "B025",
+          "B030"
+        ],
+        "type": "directional_alignment",
+        "note": "commitment/capacity management"
+      }
+    ],
+    "rule": "Consistency only affects confidence / '需要进一步了解'. Never infer deception or political reliability."
+  },
+  "interpretationBands": [
+    {
+      "min": 0,
+      "max": 39,
+      "label": "当前材料较弱/需更多信息"
+    },
+    {
+      "min": 40,
+      "max": 59,
+      "label": "中等表现"
+    },
+    {
+      "min": 60,
+      "max": 79,
+      "label": "较明显表现"
+    },
+    {
+      "min": 80,
+      "max": 100,
+      "label": "当前问卷中表现突出"
+    }
+  ],
+  "warnings": [
+    "A层不是政治可靠性、忠诚度或意识形态纯度测试。",
+    "A0只能显示受测者直接自报身份，不得从A1-A5推断。",
+    "A1单次仅3题，只能作为低精度理论熟悉度提示。",
+    "A2-A4在V1.1主要呈现原始议题立场/实践模式卡片，不生成伪精确多轴分数。",
+    "不要把A层各部分相加成综合政治分数。",
+    "A层不得进入自动吸纳/淘汰或role-fit。",
+    "B/C层继续沿用V1.0规则。"
+  ],
+  "layerAProfilePolicy": {
+    "id": "cohortlens-a-scoring-v1.1",
+    "version": "1.1.0",
+    "principles": [
+      "A0 is direct self-report only; never infer it from A1-A5.",
+      "A1 measures theory familiarity/understanding only.",
+      "A2 and A3 are primarily issue-position evidence cards in V1.1; do not force sparse answers into precise multi-axis scores.",
+      "A4 is primarily a practice-pattern evidence card set.",
+      "A5 may produce a low-confidence reflexivity summary plus evidence, but must expose item count.",
+      "Never sum A0-A5 into a single ideological score.",
+      "Never use A-layer to automatically admit, reject, rank, or allocate roles."
+    ],
+    "displayPolicy": {
+      "A0_declared_identity": "categorical_self_report",
+      "A1_theory_structure": "knowledge_familiarity_0_100_with_low_sample_notice",
+      "A2_political_economy": "issue_position_cards",
+      "A3_social_political": "issue_position_cards",
+      "A4_practice_orientation": "practice_pattern_cards",
+      "A5_reflexivity": "qualitative_summary_plus_evidence"
+    },
+    "exploratorySignals": {
+      "enabled": true,
+      "userFacingByDefault": false,
+      "purpose": "future pilot calibration / consistency analysis only",
+      "minimumEvidenceItemsPerSameAxis": 2
+    },
+    "reporting": {
+      "A0": "show respondent's selected self-description; never rewrite it as an inferred identity",
+      "A1": "show correct/answered and a cautious familiarity label; with only 3 sampled items, state low precision",
+      "A2_A3": "show the 3 answered issues and selected positions; optional neutral thematic summary only",
+      "A4": "show the 2 practice-pattern responses as descriptive evidence",
+      "A5": "show a cautious reflexivity summary only if both sampled items align; otherwise say mixed/insufficient evidence"
+    },
+    "forbiddenOutputs": [
+      "left purity score",
+      "Marxist authenticity score",
+      "political reliability",
+      "loyalty",
+      "safe/unsafe person",
+      "admit/reject recommendation",
+      "automatic ideological match score",
+      "single A-layer total score"
+    ]
+  }
+}

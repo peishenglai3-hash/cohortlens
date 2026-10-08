@@ -33,7 +33,7 @@ describe('consistency — vocabulary boundary (Engineering Bible §18)', () => {
         expect(serialised).not.toContain(word)
       }
     }
-    expect(model.confidence.rule).toContain('never output')
+    expect(model.confidence.rule).toContain('Never infer deception')
   })
 
   it('uses the three permitted labels for a directional pair', () => {

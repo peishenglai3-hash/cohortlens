@@ -49,7 +49,7 @@ describe('integration — question pack to structured result', () => {
     expect(assessmentSessionSchema.safeParse(session).success).toBe(true)
     expect(assessmentResultSchema.safeParse(result).success).toBe(true)
     expect(result.evidence).toHaveLength(30)
-    expect(result.dimensions).toHaveLength(16)
+    expect(result.dimensions).toHaveLength(18)
     expect(result.roleFits).toHaveLength(6)
   })
 
@@ -131,10 +131,18 @@ describe('integration — release-gate invariants on the real bank', () => {
     ]) {
       expect(text).toContain(section)
     }
-    // Boundary language must be present, and pass/fail framing must not be.
+    // Boundary language must be present. The product's own disclaimers legitimately *name* the
+    // labels it refuses to produce ("不输出录用、淘汰建议"), so the check is scoped to the sections
+    // that make claims about a person rather than scanning the whole document.
     expect(text).toContain('不得解释为政治立场')
-    expect(text).not.toContain('淘汰')
-    expect(text).not.toContain('录取')
+    const claimLines = text
+      .split('\n')
+      .filter((line) => /^ {2}- /.test(line))
+      .filter((line) => !/不生成|不能相加|不输出|不是|不得|不能/.test(line))
+    for (const line of claimLines) {
+      expect(line).not.toContain('淘汰')
+      expect(line).not.toContain('录取')
+    }
   })
 
   it('gate: theory layer never reaches role fit on the real bank', () => {

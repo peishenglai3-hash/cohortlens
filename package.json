@@ -24,7 +24,10 @@
     "gate:local": "npm run lint && npm run format:check && npm run typecheck && npm run validate:questions && npm run validate:config && npm run test:coverage && npm run e2e:desktop",
     "e2e": "npm run build && playwright test",
     "e2e:desktop": "npm run build && playwright test --project=chromium-desktop",
-    "gate:local:fast": "npm run lint && npm run format:check && npm run typecheck && npm run validate:questions && npm run test:coverage"
+    "gate:local:fast": "npm run lint && npm run format:check && npm run typecheck && npm run validate:questions && npm run test:coverage",
+    "build:delivery": "vite build --config vite.config.delivery.ts",
+    "pack:delivery": "tsx scripts/pack-delivery.ts",
+    "verify:delivery": "tsx scripts/verify-delivery.ts"
   },
   "dependencies": {
     "idb": "^8.0.0",
@@ -58,6 +61,7 @@
     "typescript-eslint": "8.19.0",
     "vite": "6.0.7",
     "vite-plugin-pwa": "^0.21.1",
+    "vite-plugin-singlefile": "^2.3.3",
     "vitest": "3.0.5"
   }
 }

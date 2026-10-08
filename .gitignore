@@ -7,7 +7,13 @@ npm-debug.log*
 # Build output
 dist/
 dist-ssr/
+dist-delivery/
 *.local
+
+# 甲方交付包：由 npm run pack:delivery 生成的可分发包。
+# 它是构建产物（内含 dist/ 与 dist-delivery/ 的副本），不进版本库；
+# 需要交付时重新生成并跑 npm run verify:delivery 核对即可。
+delivery/
 
 # Test / coverage
 coverage/
@@ -33,4 +39,3 @@ exports/
 playwright-report/
 test-results/
 blob-report/
-

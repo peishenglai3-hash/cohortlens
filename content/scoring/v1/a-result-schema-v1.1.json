@@ -1,0 +1,62 @@
+{
+  "id": "cohortlens-a-result-v1.1",
+  "version": "1.1.0",
+  "shape": {
+    "declaredIdentity": {
+      "source": "A0 direct answers",
+      "type": "categorical_evidence"
+    },
+    "theoryFamiliarity": {
+      "source": "A1",
+      "type": "cautious_knowledge_summary",
+      "include": [
+        "correct",
+        "answered",
+        "evidenceQuestionIds"
+      ]
+    },
+    "politicalEconomy": {
+      "source": "A2",
+      "type": "issue_position_cards",
+      "include": [
+        "questionId",
+        "topic",
+        "selectedText"
+      ]
+    },
+    "socialPolitical": {
+      "source": "A3",
+      "type": "issue_position_cards",
+      "include": [
+        "questionId",
+        "topic",
+        "selectedText"
+      ]
+    },
+    "practiceOrientation": {
+      "source": "A4",
+      "type": "practice_pattern_cards",
+      "include": [
+        "questionId",
+        "topic",
+        "selectedText"
+      ]
+    },
+    "reflexivity": {
+      "source": "A5",
+      "type": "qualitative_summary_with_evidence",
+      "include": [
+        "summary",
+        "evidenceQuestionIds",
+        "confidence"
+      ]
+    }
+  },
+  "mustNotContain": [
+    "politicalFitScore",
+    "purityScore",
+    "reliabilityScore",
+    "admissionDecision",
+    "rejectionDecision"
+  ]
+}

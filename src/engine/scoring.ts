@@ -11,6 +11,7 @@ import {
   type ScoringModel,
 } from '../domain/schemas.ts'
 import { analyseConsistency, consistencyPenalty, type ConsistencyState } from './consistency.ts'
+import { buildALayerProfile } from './a-layer-profile.ts'
 import { computeRoleFits } from './role-fit.ts'
 import type { SamplerStageReport } from './sampler.ts'
 
@@ -123,9 +124,55 @@ interface RawDimension {
   rawScore: number
   maxPossible: number
   answeredItems: number
+  /** Answered items that actually carried a numeric signal. */
+  scoredItems: number
+  /** Accumulated per-question kinds, used to derive the dimension's `scoringKind`. */
+  kinds: Set<DimensionScoringKind>
   evidenceQuestionIds: string[]
   /** Distinct normalised values reachable from the answers that were actually given. */
   reachableNormalised: Set<number>
+}
+
+export type DimensionScoringKind = 'numeric' | 'knowledge' | 'categorical' | 'descriptive'
+
+/**
+ * Which kind of value a question contributes.
+ *
+ * The distinction is not cosmetic: it decides whether a dimension may show a number at all. A0 is
+ * `categorical` because it is a self-description, and `a-scoring-model-v1.1` principle 1 forbids
+ * deriving it from anything else. A2-A5 are `descriptive`: they carry position signals that are
+ * calibration material, not correctness, and the pack explicitly asks for evidence cards instead of
+ * pseudo-precise axis scores.
+ */
+export function scoringKindFor(question: Question): DimensionScoringKind {
+  if (question.layer !== 'theory_value') return 'numeric'
+  if (question.scoringMode === 'knowledge_accuracy') return 'knowledge'
+  // A0 is the one A dimension whose whole purpose is direct self-report.
+  if (question.dimension === 'A0_declared_identity') return 'categorical'
+  return 'descriptive'
+}
+
+/** True when an option contributes a numeric score. An empty `scoring` map deliberately does not. */
+function numericSignal(option: Question['options'][number]): number | null {
+  const values = Object.values(option.scoring ?? {})
+  if (values.length === 0) return null
+  return values[0] ?? null
+}
+
+/**
+ * Collapse the kinds accumulated for a dimension.
+ *
+ * A dimension whose items disagree is described by the most restrictive kind present, because the
+ * restrictive one is the one that constrains what may be displayed: a single non-numeric item is
+ * enough to make a numeric label wrong for the whole dimension.
+ */
+function resolveDimensionKind(kinds: ReadonlySet<DimensionScoringKind>): DimensionScoringKind {
+  if (kinds.size === 0) return 'numeric'
+  if (kinds.size === 1) return [...kinds][0] ?? 'numeric'
+  if (kinds.has('categorical')) return 'categorical'
+  if (kinds.has('descriptive')) return 'descriptive'
+  if (kinds.has('knowledge')) return 'knowledge'
+  return 'numeric'
 }
 
 /**
@@ -149,6 +196,24 @@ function reachableNormalisedValues(
   }
   const denominator = Math.max(1, maxPerQuestion * questions.length)
   return new Set([...sums].map((sum) => Math.round((sum / denominator) * 100)))
+}
+
+/**
+ * Turn a pack's measurement notice into limitations text.
+ *
+ * V1.0 wrote `{validatedPsychometricInstrument: false, notes: [...]}`; V1.1 writes a plain array of
+ * statements. Both are surfaced verbatim rather than paraphrased, because the statements are the
+ * author's own description of what the instrument is not.
+ */
+function measurementNoticeLimitations(pack: QuestionPack): string[] {
+  const notice = pack.measurementNotice
+  if (!notice) return []
+  if (Array.isArray(notice)) return [...notice]
+  const out = [...notice.notes]
+  if (!notice.validatedPsychometricInstrument) {
+    out.unshift('本题库自述不是经过标准化常模验证的心理测量工具，结果只用于辅助讨论。')
+  }
+  return out
 }
 
 export function scoreAssessment({
@@ -196,8 +261,14 @@ export function scoreAssessment({
         `题目 ${question.id} 的维度 ${question.dimension} 未在评分模型 ${scoring.id}@${scoring.version} 中声明。`,
       )
     }
-    const values = question.options.map((option) => Object.values(option.scoring ?? {})[0] ?? 0)
-    const questionMax = values.length > 0 ? Math.max(...values) : maxSignal
+    const kind = scoringKindFor(question)
+    // The achievable maximum comes only from options that actually carry a signal. For a
+    // descriptive or categorical question every option is signal-free, so the question has no
+    // numeric maximum at all — which is the point, not an oversight.
+    const signalValues = question.options
+      .map((option) => numericSignal(option))
+      .filter((value): value is number => value !== null)
+    const questionMax = signalValues.length > 0 ? Math.max(...signalValues) : 0
     maxSignalByQuestion.set(question.id, questionMax)
 
     const chosen = session.answers[question.id]
@@ -213,17 +284,23 @@ export function scoreAssessment({
         rawScore: 0,
         maxPossible: 0,
         answeredItems: 0,
+        scoredItems: 0,
+        kinds: new Set<DimensionScoringKind>(),
         evidenceQuestionIds: [],
         reachableNormalised: new Set<number>(),
       } satisfies RawDimension)
+    entry.kinds.add(kind)
 
     if (option === undefined) {
       chosenOptionByQuestion.set(question.id, null)
       signalByQuestion.set(question.id, null)
     } else {
-      const signal = Object.values(option.scoring ?? {})[0] ?? 0
-      entry.rawScore += signal
-      entry.maxPossible += questionMax
+      const signal = numericSignal(option)
+      if (signal !== null) {
+        entry.rawScore += signal
+        entry.maxPossible += questionMax
+        entry.scoredItems += 1
+      }
       entry.answeredItems += 1
       entry.evidenceQuestionIds.push(question.id)
       signalByQuestion.set(question.id, signal)
@@ -235,7 +312,9 @@ export function scoreAssessment({
         questionId: question.id,
         dimension: question.dimension,
         optionId: option.id,
-        signal,
+        // `signal: 0` with `maxSignal: 0` is how a non-numeric item reports itself: there is no
+        // correctness to record, and reporting a made-up 0 would read as "answered badly".
+        signal: signal ?? 0,
         maxSignal: questionMax,
       })
     }
@@ -244,9 +323,11 @@ export function scoreAssessment({
   }
 
   for (const [dimension, entry] of raw) {
-    if (entry.answeredItems === 0) continue
+    if (entry.scoredItems === 0) continue
     entry.reachableNormalised = reachableNormalisedValues(
-      answeredByDimension.get(dimension) ?? [],
+      (answeredByDimension.get(dimension) ?? []).filter((question) =>
+        question.options.some((option) => numericSignal(option) !== null),
+      ),
       maxSignal,
     )
   }
@@ -280,25 +361,43 @@ export function scoreAssessment({
       const entry = raw.get(dimension)
       if (!entry) continue
 
-      const normalised =
-        entry.maxPossible > 0 ? Math.round((entry.rawScore / entry.maxPossible) * 100) : 0
+      const kind = resolveDimensionKind(entry.kinds)
+      const numeric = entry.scoredItems > 0 && entry.maxPossible > 0
+      /**
+       * A dimension with no numeric items has no score. It is reported as 0/0 with kind
+       * `categorical` or `descriptive` so every consumer can see that the number does not exist —
+       * rather than a normalised 0, which a reader would inevitably take as "scored badly".
+       */
+      const normalised = numeric ? Math.round((entry.rawScore / entry.maxPossible) * 100) : 0
       const expected = expectedItems.get(dimension) ?? 1
       const coverage = Math.min(1, entry.answeredItems / Math.max(1, expected))
       const dimensionPenalty = penalisedDimensions.has(dimension) ? Math.min(0.45, penalty) : 0
       const confidence = Math.max(0, Math.min(1, coverage * (1 - dimensionPenalty)))
 
       const warnings: string[] = []
-      if (entry.answeredItems <= 2) {
+      if (!numeric) {
+        warnings.push(
+          kind === 'categorical'
+            ? '该维度是答题者直接自报的自我描述，本身不产生分数；系统只原样呈现其选择，不从其他维度推断。'
+            : '该维度在本次问卷中只提供描述性证据，不产生数值分数；系统只呈现原始选择。',
+        )
+      }
+      if (numeric && entry.scoredItems <= 2) {
         const reachable = [...entry.reachableNormalised].sort((a, b) => a - b)
         warnings.push(
-          `本次问卷只抽到 ${entry.answeredItems} 道该维度题目，归一化分数只能取 ${reachable
+          `本次问卷只抽到 ${entry.scoredItems} 道该维度题目，归一化分数只能取 ${reachable
             .map((value) => String(value))
             .join(' / ')} 这几个值，粒度过粗，不能当作细粒度测量。`,
         )
       }
-      if (entry.maxPossible < entry.answeredItems * maxSignal) {
+      if (numeric && entry.maxPossible < entry.scoredItems * maxSignal) {
         warnings.push(
           `该维度有题目的选项分值上限低于 ${maxSignal}，分母按实际可达上限 ${entry.maxPossible} 计算。`,
+        )
+      }
+      if (kind === 'knowledge' && entry.scoredItems > 0 && entry.scoredItems <= 3) {
+        warnings.push(
+          `该维度单次仅 ${entry.scoredItems} 题，属于低精度提示（low sample），不能当作理论水平评定。`,
         )
       }
       if (dimensionPenalty > 0) {
@@ -315,9 +414,11 @@ export function scoreAssessment({
         normalizedScore: normalised,
         confidence,
         answeredItems: entry.answeredItems,
+        scoredItems: entry.scoredItems,
+        scoringKind: kind,
         expectedItems: expected,
         maxPossible: entry.maxPossible,
-        band: bandLabel(scoring.interpretationBands, normalised),
+        band: numeric ? bandLabel(scoring.interpretationBands, normalised) : '不产生分数',
         evidenceQuestionIds: entry.evidenceQuestionIds,
         warnings,
       })
@@ -334,35 +435,59 @@ export function scoreAssessment({
   const roleFits = computeRoleFits(roleModel, dimensions, scoring)
 
   // --- 5. strengths / development areas ------------------------------------
-  const strengths = dimensions
-    .filter((dimension) => dimension.answeredItems > 0)
+  /**
+   * Only dimensions that actually produced a number can be ranked, and the wording depends on what
+   * kind of number it is.
+   *
+   * A0 is excluded by construction (it has no numeric items) — listing a self-described identity as
+   * a strength or a weakness would turn a self-description into a judgement about the person.
+   * A2-A5 are excluded for the same reason: they are evidence cards, and `a-scoring-model-v1.1`
+   * asks for the raw positions, not a summary score.
+   *
+   * A1 stays, because it is a genuine knowledge score, but it is phrased as low-sample familiarity
+   * rather than as a verdict about the person's theory.
+   */
+  const ranked = dimensions.filter(
+    (dimension) => dimension.answeredItems > 0 && (dimension.scoredItems ?? 0) > 0,
+  )
+
+  const phraseFor = (dimension: DimensionResult, direction: 'high' | 'low'): string => {
+    if (dimension.scoringKind === 'knowledge') {
+      const base = `${dimension.label}（${dimension.id}）：本次问卷 ${dimension.answeredItems} 题中答对 ${dimension.rawScore} 题，折合 ${dimension.normalizedScore} 分。`
+      return direction === 'high'
+        ? `${base}这是低精度提示（low sample），只说明这几道概念题的作答情况，不代表理论水平。`
+        : `${base}这是低精度提示（low sample），题量太少，不足以说明理论水平，也不构成任何政治资格判断。`
+    }
+    return direction === 'high'
+      ? `${dimension.label}（${dimension.id}）：本次问卷中 ${dimension.normalizedScore} 分，落在「${dimension.band}」区间，证据题 ${dimension.evidenceQuestionIds.join('、')}。`
+      : `${dimension.label}（${dimension.id}）：本次问卷中 ${dimension.normalizedScore} 分。分数偏低可能来自题目选择或作答方式，需要结合原始回答与本人进一步确认，不构成能力判断。`
+  }
+
+  const strengths = ranked
     .slice()
     .sort((a, b) => b.normalizedScore - a.normalizedScore || (a.id < b.id ? -1 : 1))
     .slice(0, 3)
-    .map(
-      (dimension) =>
-        `${dimension.label}（${dimension.id}）：本次问卷中 ${dimension.normalizedScore} 分，落在「${dimension.band}」区间，证据题 ${dimension.evidenceQuestionIds.join('、')}。`,
-    )
+    .map((dimension) => phraseFor(dimension, 'high'))
 
-  const developmentAreas = dimensions
-    .filter((dimension) => dimension.answeredItems > 0)
+  const developmentAreas = ranked
     .slice()
     .sort((a, b) => a.normalizedScore - b.normalizedScore || (a.id < b.id ? -1 : 1))
     .slice(0, 3)
-    .map(
-      (dimension) =>
-        `${dimension.label}（${dimension.id}）：本次问卷中 ${dimension.normalizedScore} 分。分数偏低可能来自题目选择或作答方式，需要结合原始回答与本人进一步确认，不构成能力判断。`,
-    )
+    .map((dimension) => phraseFor(dimension, 'low'))
 
   // --- 6. limitations -------------------------------------------------------
   const limitations: string[] = [
     '分数只在当前题库体系内部有意义，不是人口常模，也不是百分位。',
     '系统不生成单一总分（Engineering Bible §16）。各维度不能相加成一个"综合素质"分数。',
     '理论层（A 层）结果不得解释为政治立场、政治忠诚、政治可靠性或意识形态纯度，也不参与角色适配。',
+    'A 层的六个部分不能相加成一个"政治—理论总分"；自我认同（A0）只能由答题者本人直接自报，系统不从其他回答推断。',
     '合作与技能层（B / C 层）是自陈材料，受社会赞许倾向影响，必须结合原始回答人工复核。',
     '回答一致性只描述答卷内部的方向差异，不代表是否"真实"，更不能推出任何关于人的结论。',
+    'A2–A5 在 V1.1 以议题立场与实践模式的原始卡片为主，不生成伪精确的多轴分数。',
   ]
-  const smallSample = dimensions.filter((dimension) => dimension.answeredItems <= 2)
+  const smallSample = dimensions.filter(
+    (dimension) => (dimension.scoredItems ?? 0) > 0 && dimension.answeredItems <= 2,
+  )
   if (smallSample.length > 0) {
     limitations.push(
       `本次问卷中有 ${smallSample.length} 个维度只由 1-2 道题支撑（${smallSample
@@ -370,9 +495,13 @@ export function scoreAssessment({
         .join('、')}），这些维度的分数粒度极粗。`,
     )
   }
-  if (pack.measurementNotice && !pack.measurementNotice.validatedPsychometricInstrument) {
-    limitations.push('本题库自述不是经过标准化常模验证的心理测量工具，结果只用于辅助讨论。')
+  const aKnowledge = dimensions.find((dimension) => dimension.id === 'A1_theory_structure')
+  if (aKnowledge && aKnowledge.answeredItems > 0) {
+    limitations.push(
+      `理论熟悉度（A1）单次仅 ${aKnowledge.answeredItems} 题，属于低精度提示（low sample），不能当作理论水平或政治资格的评定。`,
+    )
   }
+  limitations.push(...measurementNoticeLimitations(pack))
   for (const note of consistencyDraft.notes) limitations.push(note)
 
   const stages: SamplerStageReport[] = [...samplerStages]
@@ -387,6 +516,7 @@ export function scoreAssessment({
       roleModel: `${roleModel.id}@${roleModel.version}`,
     },
     dimensions,
+    aLayerProfile: buildALayerProfile({ paper, session, scoring, dimensions }),
     roleFits,
     strengths,
     developmentAreas,

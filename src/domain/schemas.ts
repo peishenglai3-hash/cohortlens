@@ -25,19 +25,67 @@ export const scenarioTypeSchema = z.enum(SCENARIO_TYPES)
 export type ScenarioType = z.infer<typeof scenarioTypeSchema>
 
 /**
+ * How a question's options may be reordered at render time (A-layer V1.1,
+ * `metadata.optionOrderPolicy`).
+ *
+ *   fixed               — never reorder. Used where the option list *is* the information.
+ *   shuffle             — free shuffle is safe (knowledge items).
+ *   preserve_or_reverse — the options carry a semantic progression, so only the whole order or its
+ *                         whole reverse is allowed; never an arbitrary permutation.
+ *
+ * Absent means `shuffle`, which is the V1.0 behaviour, so older packs keep working unchanged.
+ */
+export const OPTION_ORDER_POLICIES = ['fixed', 'shuffle', 'preserve_or_reverse'] as const
+export const optionOrderPolicySchema = z.enum(OPTION_ORDER_POLICIES)
+export type OptionOrderPolicy = z.infer<typeof optionOrderPolicySchema>
+
+/**
+ * How a question's option signals are meant to be read (A-layer V1.1, `scoringMode`).
+ *
+ *   knowledge_accuracy — one option is correct; the signal is correctness.
+ *   profile_signal     — no correct answer; the signal is a position on an axis, and an *empty*
+ *                        `scoring` map means "this item contributes no numeric score at all"
+ *                        (A0 direct self-report; A2-A5 descriptive evidence).
+ *
+ * Absent means the V1.0 behaviour: one scored dimension with a single best option.
+ */
+export const SCORING_MODES = ['knowledge_accuracy', 'profile_signal'] as const
+export const scoringModeSchema = z.enum(SCORING_MODES)
+export type ScoringMode = z.infer<typeof scoringModeSchema>
+
+/**
  * 0-3 signal scale per option (README "Scoring": `normalized = round(sum(score) /
  * max_possible_for_answered_items * 100)`).
  */
 export const signalValueSchema = z.number().int().min(0).max(3)
 
+/** A2-A5 exploratory axis signal: a position, not a correctness mark. */
+export const profileSignalValueSchema = z.number().int().min(-2).max(2)
+
 export const questionOptionSchema = z
   .object({
     id: z.string().min(1),
     text: z.string().min(1),
-    /** dimensionId -> 0..3 signal. Keyed by dimension, never by option position. */
+    /**
+     * dimensionId -> 0..3 signal. Keyed by dimension, never by option position.
+     *
+     * An **empty** map is meaningful, not missing: it marks an option that contributes no numeric
+     * score. The engine must not invent a score for it.
+     */
     scoring: z.record(z.string(), signalValueSchema).optional(),
     /** roleId -> 0..3 secondary signal (Engineering Bible §7, README C layer). */
     roleSignals: z.record(z.string(), signalValueSchema).optional(),
+    /**
+     * A0 only: which declared-identity category this option represents. Rendered verbatim as the
+     * respondent's own statement; never converted into a score and never inferred from elsewhere.
+     */
+    selfReportCategory: z.string().min(1).optional(),
+    /**
+     * A2-A5: axisId -> −2..2 position signal. Exploratory calibration material, NOT a correctness
+     * score, and not user-facing by default (a-scoring-model-v1.1
+     * `exploratorySignals.userFacingByDefault: false`).
+     */
+    profileSignals: z.record(z.string(), profileSignalValueSchema).optional(),
     /** Free-form author notes. Never interpreted by the engine. */
     metadata: z.record(z.string(), z.unknown()).optional(),
   })
@@ -62,9 +110,12 @@ export const questionSchema = z
     reverse: z.boolean().optional(),
     familyId: z.string().min(1).optional(),
 
+    /** A-layer V1.1. Absent means V1.0 single-best-option scoring. */
+    scoringMode: scoringModeSchema.optional(),
+
     options: z.array(questionOptionSchema).min(2),
 
-    /** Inert author annotation (e.g. `signal`, `consistencyGroups`). Never drives scoring. */
+    /** Inert author annotation (e.g. `signal`, `consistencyGroups`, `optionOrderPolicy`). */
     metadata: z.record(z.string(), z.unknown()).optional(),
   })
   .strict()
@@ -99,7 +150,13 @@ export const assessmentPolicySchema = z
         seeded: z.boolean(),
         avoidDuplicateQuestion: z.boolean(),
         avoidSameFamily: z.boolean(),
-        optionShuffle: z.boolean(),
+        /**
+         * V1.0 wrote a boolean here. V1.1 writes `"per_question_policy"`, because from V1.1 the
+         * A-layer mixes question types whose options must NOT all be shuffled the same way (A0
+         * fixed, A1 free, A2/A3 order-sensitive). Both forms are accepted; the per-question
+         * `metadata.optionOrderPolicy` is authoritative whenever it is present.
+         */
+        optionShuffle: z.union([z.boolean(), z.string().min(1)]),
       })
       .strict()
       .optional(),
@@ -119,12 +176,22 @@ export const questionPackSchema = z
     createdAt: z.string().min(1),
     assessmentPolicy: assessmentPolicySchema,
     questions: z.array(questionSchema),
+    /**
+     * V1.0 wrote an object (`{validatedPsychometricInstrument, notes}`); V1.1 writes a plain array
+     * of statements. Both are accepted, and the V1.1 form is treated as "not a validated
+     * psychometric instrument" because that is exactly what its statements say — the A layer is
+     * described as a voluntary profile, not a normed instrument.
+     */
     measurementNotice: z
-      .object({
-        validatedPsychometricInstrument: z.boolean(),
-        notes: z.array(z.string()),
-      })
-      .passthrough()
+      .union([
+        z
+          .object({
+            validatedPsychometricInstrument: z.boolean(),
+            notes: z.array(z.string()),
+          })
+          .passthrough(),
+        z.array(z.string()),
+      ])
       .optional(),
   })
   .strict()
@@ -156,6 +223,47 @@ export type ConsistencyGroup = z.infer<typeof consistencyGroupSchema>
 
 const dimensionMapSchema = z.record(z.string(), z.string())
 
+/**
+ * A-layer display policy (A-layer V1.1, `scoring-v1.1.layerAProfilePolicy` and the standalone
+ * `a-scoring-model-v1.1.json`).
+ *
+ * This is what stops the A layer from being read as a scoreboard: each dimension declares how it
+ * may be shown, and `forbiddenOutputs` names what may never be produced from it.
+ */
+export const aDisplayPolicies = [
+  'categorical_self_report',
+  'knowledge_familiarity_0_100_with_low_sample_notice',
+  'knowledge_familiarity_low_sample',
+  'issue_position_cards',
+  'practice_pattern_cards',
+  'qualitative_summary_plus_evidence',
+  'qualitative_summary_with_evidence',
+] as const
+
+export const aDisplayPolicySchema = z.enum(aDisplayPolicies)
+export type ADisplayPolicy = z.infer<typeof aDisplayPolicySchema>
+
+export const aLayerProfilePolicySchema = z
+  .object({
+    id: z.string().min(1),
+    version: z.string().min(1),
+    principles: z.array(z.string()),
+    displayPolicy: z.record(z.string(), aDisplayPolicySchema),
+    exploratorySignals: z
+      .object({
+        enabled: z.boolean(),
+        userFacingByDefault: z.boolean(),
+        purpose: z.string(),
+        minimumEvidenceItemsPerSameAxis: z.number().int().nonnegative(),
+      })
+      .strict(),
+    reporting: z.record(z.string(), z.string()),
+    forbiddenOutputs: z.array(z.string()),
+  })
+  .strict()
+
+export type ALayerProfilePolicy = z.infer<typeof aLayerProfilePolicySchema>
+
 export const scoringModelSchema = z
   .object({
     id: z.string().min(1),
@@ -174,6 +282,9 @@ export const scoringModelSchema = z
         dimensions: dimensionMapSchema,
         useInRoleFit: z.boolean(),
         useForAdmissionDecision: z.boolean(),
+        /** A-layer V1.1. `false` means no A-layer total may ever be produced. */
+        aggregateTotalScore: z.boolean().optional(),
+        displayPolicy: z.record(z.string(), aDisplayPolicySchema).optional(),
       })
       .strict(),
     layerB: z.object({ name: z.string(), dimensions: dimensionMapSchema }).strict(),
@@ -188,10 +299,50 @@ export const scoringModelSchema = z
       .strict(),
     interpretationBands: z.array(interpretationBandSchema).min(1),
     warnings: z.array(z.string()),
+    /** A-layer V1.1. Optional so a V1.0 scoring model still validates. */
+    layerAProfilePolicy: aLayerProfilePolicySchema.optional(),
   })
   .strict()
 
 export type ScoringModel = z.infer<typeof scoringModelSchema>
+
+/**
+ * Standalone A-layer policy document (`a-scoring-model-v1.1.json`). Kept as its own file because
+ * the A-layer measurement model is expected to be revised on its own cadence, independently of the
+ * full scoring model.
+ */
+export const aScoringModelSchema = z
+  .object({
+    id: z.string().min(1),
+    version: z.string().min(1),
+    principles: z.array(z.string()),
+    displayPolicy: z.record(z.string(), aDisplayPolicySchema),
+    exploratorySignals: z
+      .object({
+        enabled: z.boolean(),
+        userFacingByDefault: z.boolean(),
+        purpose: z.string(),
+        minimumEvidenceItemsPerSameAxis: z.number().int().nonnegative(),
+      })
+      .strict(),
+    reporting: z.record(z.string(), z.string()),
+    forbiddenOutputs: z.array(z.string()),
+  })
+  .strict()
+
+export type AScoringModel = z.infer<typeof aScoringModelSchema>
+
+/** A-layer result shape (`a-result-schema-v1.1.json`), used to assert what may NOT be produced. */
+export const aResultSchemaDocSchema = z
+  .object({
+    id: z.string().min(1),
+    version: z.string().min(1),
+    shape: z.record(z.string(), z.unknown()),
+    mustNotContain: z.array(z.string()),
+  })
+  .strict()
+
+export type AResultSchemaDoc = z.infer<typeof aResultSchemaDocSchema>
 
 // ---------------------------------------------------------------------------
 // Role model (role-model-v1.0.json)
@@ -298,6 +449,21 @@ export const dimensionResultSchema = z
     normalizedScore: z.number().min(0).max(100),
     confidence: z.number().min(0).max(1),
     answeredItems: z.number().int().nonnegative(),
+    /**
+     * How many answered items actually carried a numeric signal. Lower than `answeredItems` for a
+     * descriptive dimension and zero for A0 — which is why the two counts stay separate instead of
+     * one number silently implying the other.
+     */
+    scoredItems: z.number().int().nonnegative().optional(),
+    /**
+     * What kind of value, if any, this dimension may show.
+     *
+     *   numeric     — a V1.0-style scored dimension.
+     *   knowledge   — correct/answered against a known answer key; low-sample here.
+     *   categorical — A0 direct self-report: no number exists, and none may be invented.
+     *   descriptive — A2-A5 positions and patterns: evidence cards, not scores.
+     */
+    scoringKind: z.enum(['numeric', 'knowledge', 'categorical', 'descriptive']).optional(),
     expectedItems: z.number().int().nonnegative(),
     maxPossible: z.number().nonnegative(),
     band: z.string(),
@@ -312,6 +478,117 @@ export const dimensionResultSchema = z
   .strict()
 
 export type DimensionResult = z.infer<typeof dimensionResultSchema>
+
+// ---------------------------------------------------------------------------
+// A-layer profile (A-layer V1.1)
+// ---------------------------------------------------------------------------
+
+/**
+ * A0 — the respondent's own self-description, reproduced verbatim.
+ *
+ * This is the one A-layer output that is not a measurement at all: it is what the person said about
+ * themselves. `a-scoring-model-v1.1` principle 1 forbids inferring it from A1-A5, and the A-layer
+ * result schema calls it `categorical_evidence`, so there is deliberately no score field here.
+ */
+export const declaredIdentityItemSchema = z
+  .object({
+    questionId: z.string().min(1),
+    topic: z.string(),
+    selectedCategory: z.string().min(1),
+    selectedText: z.string().min(1),
+  })
+  .strict()
+
+export type DeclaredIdentityItem = z.infer<typeof declaredIdentityItemSchema>
+
+/** A1 — theory familiarity. A knowledge score, capped by an explicit low-sample notice. */
+export const theoryFamiliaritySchema = z
+  .object({
+    correct: z.number().int().nonnegative(),
+    answered: z.number().int().nonnegative(),
+    normalizedScore: z.number().min(0).max(100),
+    band: z.string(),
+    lowSample: z.boolean(),
+    note: z.string(),
+    evidenceQuestionIds: z.array(z.string()),
+  })
+  .strict()
+
+export type TheoryFamiliarity = z.infer<typeof theoryFamiliaritySchema>
+
+/** A2-A4 — issue positions and practice patterns, shown as evidence cards rather than scores. */
+export const issuePositionCardSchema = z
+  .object({
+    questionId: z.string().min(1),
+    topic: z.string(),
+    prompt: z.string(),
+    selectedText: z.string().min(1),
+  })
+  .strict()
+
+export type IssuePositionCard = z.infer<typeof issuePositionCardSchema>
+
+/** A5 — a reflexivity summary that may only speak when its two items agree. */
+export const reflexivitySummarySchema = z
+  .object({
+    state: z.enum(['aligned', 'mixed', 'insufficient']),
+    summary: z.string(),
+    confidence: z.number().min(0).max(1),
+    evidenceQuestionIds: z.array(z.string()),
+  })
+  .strict()
+
+export type ReflexivitySummary = z.infer<typeof reflexivitySummarySchema>
+
+export const aLayerProfileSchema = z
+  .object({
+    /** Which display policy each dimension was rendered under, for auditability. */
+    displayPolicy: z.record(z.string(), z.string()),
+    declaredIdentity: z.array(declaredIdentityItemSchema),
+    theoryFamiliarity: theoryFamiliaritySchema.nullable(),
+    politicalEconomy: z.array(issuePositionCardSchema),
+    socialPolitical: z.array(issuePositionCardSchema),
+    practiceOrientation: z.array(issuePositionCardSchema),
+    reflexivity: reflexivitySummarySchema,
+    /**
+     * Always present and always these statements. The A layer cannot be summed, and this is where
+     * the result says so about itself instead of relying on the UI to remember.
+     */
+    boundaries: z.array(z.string()),
+  })
+  .strict()
+
+export type ALayerProfile = z.infer<typeof aLayerProfileSchema>
+
+/**
+ * The six A-layer V1.1 dimensions, in the order they are presented.
+ *
+ * Declared here rather than in the engine because the same list decides three things that must not
+ * drift apart: which dimensions are drawn, in what order they are displayed, and which ones the
+ * role-fit engine must never see.
+ */
+export const A_LAYER_DIMENSIONS = {
+  a0: 'A0_declared_identity',
+  a1: 'A1_theory_structure',
+  a2: 'A2_political_economy',
+  a3: 'A3_social_political',
+  a4: 'A4_practice_orientation',
+  a5: 'A5_reflexivity',
+} as const
+
+/**
+ * Statements the A layer makes about itself, carried inside every A-layer result.
+ *
+ * They live in the result rather than only in the UI so that an exported JSON, a printed page, or
+ * a future consumer inherits the boundary instead of depending on someone remembering it.
+ */
+export const A_LAYER_BOUNDARIES = [
+  '本部分是自愿的政治—理论画像，不是政治可靠性、忠诚度或意识形态纯度测试。',
+  '自我认同（A0）只来自答题者本人的直接自报，系统不从其他回答推断。',
+  'A 层六个部分不能相加成一个综合政治分数，系统不生成任何此类总分。',
+  'A 层不参与角色适配，也不用于自动吸纳或淘汰。',
+  'A2–A5 以原始议题立场与实践模式为主，不把稀疏样本压成精确多轴分数。',
+] as const
 
 export const roleFitResultSchema = z
   .object({
@@ -401,6 +678,13 @@ export const assessmentResultSchema = z
     developmentAreas: z.array(z.string()),
     consistency: consistencyResultSchema,
     evidence: z.array(evidenceReferenceSchema),
+    /**
+     * A-layer V1.1 six-part profile. Absent for a V1.0 result, which had four score dimensions
+     * instead. Kept separate from `dimensions` because the A layer is not a score vector and must
+     * not be rendered as one: A0 has no number at all, A2-A4 are evidence cards, and A5 may only
+     * speak when its items agree.
+     */
+    aLayerProfile: aLayerProfileSchema.optional(),
     /**
      * Which Engineering Bible §10 sampler stages actually did anything under the loaded
      * question pack. Reported instead of pretending a no-op stage ran.

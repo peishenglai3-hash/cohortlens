@@ -20,6 +20,7 @@ import {
  */
 
 const bundle = loadContentBundle()
+const { scoring } = bundle
 let counter = 0
 let handle: DatabaseHandle
 let repos: Repositories
@@ -117,7 +118,11 @@ describe('result repository', () => {
     const bySession = await repos.results.findBySession(session.id)
     expect(byId?.id).toBe(result.id)
     expect(bySession?.id).toBe(result.id)
-    expect(byId?.dimensions).toHaveLength(16)
+    expect(byId?.dimensions).toHaveLength(
+      Object.keys(scoring.layerA.dimensions).length +
+        Object.keys(scoring.layerB.dimensions).length +
+        Object.keys(scoring.layerC.dimensions).length,
+    )
   })
 
   it('lists results newest-first', async () => {

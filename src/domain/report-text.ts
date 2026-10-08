@@ -53,12 +53,92 @@ export function renderResultText(
   lines.push('-'.repeat(78))
   lines.push('一、维度画像 Profile Vector（系统不输出单一总分）')
   lines.push('-'.repeat(78))
+
+  /**
+   * A-layer V1.1 gets its own six-part section instead of score rows: A0 has no number at all,
+   * A2-A4 are issue positions, and A5 is qualitative. Printing them as "0 / 100" rows would read as
+   * a scoreboard, which is exactly what the A-layer policy forbids (DSH-MIGRATION-V1.1 §5).
+   */
+  if (result.aLayerProfile) {
+    const profile = result.aLayerProfile
+    lines.push('')
+    lines.push('A 层 / 思想认同与政治—理论画像（自愿自报，不参与角色适配，不生成任何综合分）')
+    for (const boundary of profile.boundaries) lines.push(row('', `边界：${boundary}`))
+
+    lines.push('')
+    lines.push('  1 · 自我声明的理论认同（A0，直接自报，无分数）')
+    if (profile.declaredIdentity.length === 0) {
+      lines.push(row('', '(本次未作答或未抽到)'))
+    }
+    for (const item of profile.declaredIdentity) {
+      lines.push(row(`    ${item.questionId}`, item.topic))
+      lines.push(row('', `      -> 本人选择：${item.selectedText}`))
+      lines.push(row('', `         自报类别：${item.selectedCategory}`))
+    }
+
+    lines.push('')
+    lines.push('  2 · 理论熟悉程度（A1，低精度提示 low sample）')
+    if (profile.theoryFamiliarity) {
+      const familiarity = profile.theoryFamiliarity
+      lines.push(
+        row(
+          '    答对 / 作答',
+          `${familiarity.correct} / ${familiarity.answered}（${familiarity.normalizedScore} / 100，${familiarity.band}）`,
+        ),
+      )
+      lines.push(row('', `      ${familiarity.note}`))
+      lines.push(row('', `      证据题 ${familiarity.evidenceQuestionIds.join(',')}`))
+    } else {
+      lines.push(row('', '(本次未抽到 A1 题目)'))
+    }
+
+    const cardSections: [string, typeof profile.politicalEconomy][] = [
+      ['  3 · 政治经济议题立场（A2，原始立场，不折算分数）', profile.politicalEconomy],
+      ['  4 · 社会—政治议题立场（A3，原始立场，不折算分数）', profile.socialPolitical],
+      ['  5 · 实践取向（A4，原始取向，不折算分数）', profile.practiceOrientation],
+    ]
+    for (const [title, cards] of cardSections) {
+      lines.push('')
+      lines.push(title)
+      if (cards.length === 0) lines.push(row('', '(本次未作答或未抽到)'))
+      for (const card of cards) {
+        lines.push(row(`    ${card.questionId}`, card.prompt))
+        lines.push(row('', `      -> 本人选择：${card.selectedText}`))
+      }
+    }
+
+    lines.push('')
+    lines.push('  6 · 反身性与修正方式（A5）')
+    lines.push(
+      row(
+        '    状态',
+        `${profile.reflexivity.state}${profile.reflexivity.confidence > 0 ? `（置信度 ${formatPercent(profile.reflexivity.confidence)}）` : ''}`,
+      ),
+    )
+    lines.push(row('', `      ${profile.reflexivity.summary}`))
+    for (const questionId of profile.reflexivity.evidenceQuestionIds) {
+      const question = byId.get(questionId)
+      if (!question) continue
+      lines.push(row('', `      ${questionId} ${question.prompt}`))
+    }
+  }
+
   for (const layer of LAYERS) {
+    // With an A-layer profile present, layer A is already printed above as six narrative parts.
+    if (layer === 'theory_value' && result.aLayerProfile) continue
     const rows = result.dimensions.filter((dimension) => dimension.layer === layer)
     if (rows.length === 0) continue
     lines.push('')
     lines.push(LAYER_TITLES[layer])
     for (const dimension of rows) {
+      const numeric = (dimension.scoredItems ?? 1) > 0
+      if (!numeric) {
+        lines.push(row(dimension.label, `不产生分数（本次作答 ${dimension.answeredItems} 题）`))
+        for (const warning of dimension.warnings ?? []) {
+          lines.push(row('', `注意：${warning}`))
+        }
+        continue
+      }
       lines.push(
         row(
           dimension.label,

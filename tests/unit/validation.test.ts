@@ -69,25 +69,30 @@ function codeOf(report: ReturnType<typeof run>, code: string): Finding | undefin
   return report.findings.find((finding) => finding.code === code)
 }
 
-describe('validation — the frozen bank (Engineering Bible §51)', () => {
+describe('validation — the active bank (Engineering Bible §51)', () => {
   const report = run()
+  const allDimensions =
+    Object.keys(scoring.layerA.dimensions).length +
+    Object.keys(scoring.layerB.dimensions).length +
+    Object.keys(scoring.layerC.dimensions).length
 
   it('passes with zero errors', () => {
-    expect(errors(report)).toEqual([])
+    expect(errors(report).map((finding) => `${finding.code}: ${finding.message}`)).toEqual([])
     expect(report.ok).toBe(true)
   })
 
   it('counts 120 questions and reports every dimension', () => {
     expect(report.counts.questions).toBe(120)
-    expect(report.dimensions).toHaveLength(16)
+    expect(report.dimensions).toHaveLength(allDimensions)
     expect(report.dimensions.reduce((sum, dimension) => sum + dimension.bankCount, 0)).toBe(120)
   })
 
-  it('runs every declared check and marks exactly four as inactive', () => {
+  it('marks only the structurally inapplicable checks as inactive', () => {
     const inactive = report.findings.filter((finding) => finding.severity === 'inactive')
+    // A-layer V1.1 activates the difficulty and family stages (its A layer has three difficulty
+    // levels and shares families across sub-topics). What remains inapplicable: reverse items
+    // (none in the bank) and the sampler-stage summary itself, which is inactive when any stage is.
     expect(inactive.map((finding) => finding.code).sort()).toEqual([
-      'difficulty_balance',
-      'family_conflict',
       'reverse_items',
       'sampler_stages',
     ])
@@ -95,12 +100,37 @@ describe('validation — the frozen bank (Engineering Bible §51)', () => {
 
   it('surfaces the known measurement limits of the bank as warnings, not as silence', () => {
     expect(codeOf(report, 'transparent_single_key')?.severity).toBe('warning')
-    expect(codeOf(report, 'key_position_tell')?.severity).toBe('warning')
     expect(codeOf(report, 'unreachable_score_floor')?.severity).toBe('warning')
-    expect(codeOf(report, 'negative_stem_without_reverse_flag')?.severity).toBe('warning')
     expect(codeOf(report, 'truncated_stem')?.severity).toBe('warning')
-    expect(codeOf(report, 'consistency_group_political_label')?.severity).toBe('warning')
-    expect(codeOf(report, 'consistency_group_cross_layer')?.severity).toBe('warning')
+    expect(codeOf(report, 'forbidden_language_list_gap')?.severity).toBe('warning')
+    // The A-layer replacement removed V1.0's two negative-stem items (A011/A059), so that warning
+    // legitimately no longer fires. It must still exist as a check, or its absence would be silence.
+    expect(codeOf(report, 'negative_stem_without_reverse_flag')).toBeDefined()
+    expect(codeOf(report, 'key_position_tell')).toBeDefined()
+  })
+
+  it('reports the key-position distribution over scored questions only', () => {
+    const tell = codeOf(report, 'key_position_tell')
+    expect(tell?.message).toContain('计分题')
+    // A-layer V1.1's knowledge items were hand-balanced, so the overall spread improves; the check
+    // must still measure it rather than assume.
+    expect(tell?.message).toMatch(/[A-D]=\d+/)
+  })
+
+  it('reports the A-layer V1.1 structural rules as passing checks, not absences', () => {
+    for (const code of [
+      'a_layer_quota_shape',
+      'a0_self_report_only',
+      'a1_answer_position_balance',
+      'option_order_policy_respected',
+      'stale_a_consistency_groups_removed',
+      'a_layer_boundary_text',
+      'a_layer_scoring_policy_consistency',
+      'descriptive_items_not_scored',
+    ]) {
+      expect(codeOf(report, code), code).toBeDefined()
+      expect(codeOf(report, code)?.severity, code).toBe('pass')
+    }
   })
 
   it('records the forbidden-language gap between code and the frozen content file', () => {

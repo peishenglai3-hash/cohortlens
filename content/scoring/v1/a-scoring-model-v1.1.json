@@ -1,0 +1,44 @@
+{
+  "id": "cohortlens-a-scoring-v1.1",
+  "version": "1.1.0",
+  "principles": [
+    "A0 is direct self-report only; never infer it from A1-A5.",
+    "A1 measures theory familiarity/understanding only.",
+    "A2 and A3 are primarily issue-position evidence cards in V1.1; do not force sparse answers into precise multi-axis scores.",
+    "A4 is primarily a practice-pattern evidence card set.",
+    "A5 may produce a low-confidence reflexivity summary plus evidence, but must expose item count.",
+    "Never sum A0-A5 into a single ideological score.",
+    "Never use A-layer to automatically admit, reject, rank, or allocate roles."
+  ],
+  "displayPolicy": {
+    "A0_declared_identity": "categorical_self_report",
+    "A1_theory_structure": "knowledge_familiarity_0_100_with_low_sample_notice",
+    "A2_political_economy": "issue_position_cards",
+    "A3_social_political": "issue_position_cards",
+    "A4_practice_orientation": "practice_pattern_cards",
+    "A5_reflexivity": "qualitative_summary_plus_evidence"
+  },
+  "exploratorySignals": {
+    "enabled": true,
+    "userFacingByDefault": false,
+    "purpose": "future pilot calibration / consistency analysis only",
+    "minimumEvidenceItemsPerSameAxis": 2
+  },
+  "reporting": {
+    "A0": "show respondent's selected self-description; never rewrite it as an inferred identity",
+    "A1": "show correct/answered and a cautious familiarity label; with only 3 sampled items, state low precision",
+    "A2_A3": "show the 3 answered issues and selected positions; optional neutral thematic summary only",
+    "A4": "show the 2 practice-pattern responses as descriptive evidence",
+    "A5": "show a cautious reflexivity summary only if both sampled items align; otherwise say mixed/insufficient evidence"
+  },
+  "forbiddenOutputs": [
+    "left purity score",
+    "Marxist authenticity score",
+    "political reliability",
+    "loyalty",
+    "safe/unsafe person",
+    "admit/reject recommendation",
+    "automatic ideological match score",
+    "single A-layer total score"
+  ]
+}

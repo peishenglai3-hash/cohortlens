@@ -115,11 +115,18 @@ describe('scoring — deterministic core (Engineering Bible §14, §50)', () => 
 })
 
 describe('scoring — normalization (Engineering Bible §15)', () => {
-  it('matches the documented formula sum / maxPossible * 100', () => {
+  it('matches the documented formula for every dimension that has a number', () => {
     for (const seed of ['norm-1', 'norm-2', 'norm-3']) {
       const session = buildSession(seed)
       const result = scoreAssessment({ pack, scoring, roleModel, session, generatedAt: FIXED_TIME })
       for (const dimension of result.dimensions) {
+        // A0 and the descriptive A dimensions carry no numeric items by design, so they are skipped
+        // here and covered by the dedicated A-layer tests instead.
+        if ((dimension.scoredItems ?? 0) === 0) {
+          expect(dimension.normalizedScore).toBe(0)
+          expect(dimension.maxPossible).toBe(0)
+          continue
+        }
         expect(dimension.maxPossible).toBeGreaterThan(0)
         const expected = Math.round((dimension.rawScore / dimension.maxPossible) * 100)
         expect(dimension.normalizedScore).toBe(expected)
@@ -127,12 +134,18 @@ describe('scoring — normalization (Engineering Bible §15)', () => {
     }
   })
 
-  it('gives every dimension 100 when the simulated respondent always picks the maximum', () => {
+  it('gives every numeric dimension 100 when the simulated respondent always picks the maximum', () => {
     const session = buildSession('all-high', 'high')
     const result = scoreAssessment({ pack, scoring, roleModel, session, generatedAt: FIXED_TIME })
-    for (const dimension of result.dimensions) {
+    const numeric = result.dimensions.filter((dimension) => (dimension.scoredItems ?? 0) > 0)
+    expect(numeric.length).toBeGreaterThan(0)
+    for (const dimension of numeric) {
       expect(dimension.normalizedScore).toBe(100)
       expect(dimension.band).toBe(scoring.interpretationBands.at(-1)?.label)
+    }
+    // A non-numeric dimension must NOT be reported as a perfect score; it has no score at all.
+    for (const dimension of result.dimensions.filter((d) => (d.scoredItems ?? 0) === 0)) {
+      expect(dimension.band).toBe('不产生分数')
     }
   })
 
@@ -163,11 +176,20 @@ describe('scoring — normalization (Engineering Bible §15)', () => {
 })
 
 describe('scoring — coverage, confidence and small-sample honesty', () => {
-  it('flags every dimension measured by one or two items', () => {
+  it('flags every numeric dimension measured by one or two items', () => {
     const result = score('small-sample')
     for (const dimension of result.dimensions) {
-      if (dimension.answeredItems <= 2) {
+      const scored = dimension.scoredItems ?? 0
+      if (scored > 0 && scored <= 2) {
         expect(dimension.warnings?.some((warning) => warning.includes('粒度过粗'))).toBe(true)
+      }
+      // A dimension with no numeric items must say so instead of claiming coarse precision.
+      if (scored === 0 && dimension.answeredItems > 0) {
+        expect(
+          dimension.warnings?.some(
+            (warning) => warning.includes('不产生分数') || warning.includes('描述性证据'),
+          ),
+        ).toBe(true)
       }
     }
   })
@@ -175,13 +197,11 @@ describe('scoring — coverage, confidence and small-sample honesty', () => {
   it('matches the ADR-008 expected-items definition per layer', () => {
     const result = score('expected-items')
     const expectedByDimension = new Map(result.dimensions.map((d) => [d.id, d.expectedItems]))
-    // Layer A: declared subQuota maximum (4) after the rotating shortfall is applied.
-    for (const dimension of [
-      'conceptual_understanding',
-      'theory_reality',
-      'organizational_judgment',
-    ]) {
-      expect(expectedByDimension.get(dimension)).toBe(4)
+    const subQuotaA = pack.assessmentPolicy.subQuota?.theory_value ?? {}
+
+    // Layer A: the pack's declared per-dimension quota, verbatim — no derived shortfall any more.
+    for (const dimension of Object.keys(scoring.layerA.dimensions)) {
+      expect(expectedByDimension.get(dimension), `A ${dimension}`).toBe(subQuotaA[dimension])
     }
     // Layer B: declared minimum per dimension.
     for (const dimension of [

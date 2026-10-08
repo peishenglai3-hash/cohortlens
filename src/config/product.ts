@@ -31,8 +31,12 @@ export const PRODUCT_CONFIG: ProductConfig = {
   subtitle: '本地优先的结构化测评工具',
   description: appConfig.description,
   assessment: {
-    questionPackId: 'cohortlens-cn-v1',
-    scoringModelId: 'scoring-v1',
+    // Must track the active content bundle. `validate:config` compares these against the ids the
+    // loader actually parsed, so a stale id here fails the gate rather than shipping silently.
+    // A-layer V1.1 swap: cohortlens-cn-v1@1.0.0 -> cohortlens-question-pack-v1.1@1.1.0,
+    // scoring-v1@1.0.0 -> scoring-v1.1@1.1.0. The role model is unchanged from V1.0.
+    questionPackId: 'cohortlens-question-pack-v1.1',
+    scoringModelId: 'scoring-v1.1',
     roleModelId: 'roles-v1',
   },
 }
