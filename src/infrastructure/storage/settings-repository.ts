@@ -20,12 +20,31 @@ export interface AppSettings {
   /** Id of the assessment in progress, so a returning user lands back on it. */
   currentSessionId: string | null
   provider: ProviderConfig
+  /**
+   * 作答端向审阅台提交的地址覆盖值（A-layer V1.1 之后的审阅台功能）。
+   *
+   * 默认取自 `application.json` 的 `reviewEndpoint`，也就是随构建固化——公开链接发出去就自带后端，
+   * 作答者什么都不用配。这个字段是给**同一份构建换后端**用的（换测试环境、换另一台 Worker）。
+   *
+   * 它不是密钥，所以放在 settings 而不是 secrets。
+   */
+  reviewEndpoint: string
+  /**
+   * 从邀请链接里带进来的邀请码。
+   *
+   * 存在这里而不是只留在内存里，是因为作答者会中途刷新页面——刷新后邀请码丢了，他点击提交只会
+   * 得到"缺少邀请码"，然后不知道该做什么。邀请码本身不是敏感凭据（它只决定能否提交），
+   * 但它确实是一种凭据，所以导出 JSON 时会被剥掉（见 `buildExportBundle`）。
+   */
+  inviteCode: string
   updatedAt: string
 }
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {
   currentSessionId: null,
   provider: { ...DEFAULT_PROVIDER_CONFIG },
+  reviewEndpoint: '',
+  inviteCode: '',
   updatedAt: new Date(0).toISOString(),
 }
 

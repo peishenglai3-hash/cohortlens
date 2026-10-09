@@ -18,6 +18,13 @@ import {
   type AppSettings,
 } from '../infrastructure/storage/settings-repository.ts'
 import type { ReportRecord } from '../infrastructure/storage/report-repository.ts'
+import { resolveSubmissionConfig, readInviteFromHash } from '../config/submission-config.ts'
+import { submitAssessment } from '../infrastructure/submission/submit-client.ts'
+import {
+  IDLE_SUBMISSION_STATE,
+  type ContactKind,
+  type SubmissionState,
+} from '../infrastructure/submission/types.ts'
 
 /**
  * The application store.
@@ -69,6 +76,12 @@ export interface AppState {
   reportStatus: 'idle' | 'generating' | 'ready' | 'failed'
   reportError: string | null
 
+  /**
+   * 提交到审阅台的状态。与报告状态分开：报告是可选的 AI 转写，提交是把材料交给发起方，
+   * 两者失败的原因和补救方式完全不同，混在一个状态里会让界面只能给出笼统的提示。
+   */
+  submission: SubmissionState
+
   boot: () => Promise<void>
   startNew: (options?: { seed?: string }) => Promise<void>
   resume: (sessionId: string) => Promise<void>
@@ -83,6 +96,10 @@ export interface AppState {
   saveSettings: (patch: Partial<AppSettings>) => Promise<void>
   setReport: (report: ReportRecord | null) => void
   setReportStatus: (status: AppState['reportStatus'], error?: string | null) => void
+  /** 采纳邀请链接里的码。已经在设置里存了同一个码时是空操作。 */
+  adoptInviteCode: (code: string) => Promise<void>
+  /** 把当前结果提交给发起方。 */
+  submitToReview: (contact: { kind: ContactKind; value: string }) => Promise<boolean>
   clearAllData: () => Promise<void>
 }
 
@@ -188,6 +205,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   reportStatus: 'idle',
   reportError: null,
 
+  submission: { ...IDLE_SUBMISSION_STATE },
+
   boot: async () => {
     set({ bootStatus: 'loading', bootError: null })
     try {
@@ -220,6 +239,16 @@ export const useAppStore = create<AppState>((set, get) => ({
         index: session ? resumeIndexFor(session) : 0,
         reportStatus: report ? 'ready' : 'idle',
         reportError: null,
+        // A session that already reached the review console comes back as "submitted": reopening
+        // the page must not look like the submission was lost.
+        submission: session?.submittedId
+          ? {
+              ...IDLE_SUBMISSION_STATE,
+              outcome: 'submitted',
+              submissionId: session.submittedId,
+              submittedAt: session.submittedAt ?? null,
+            }
+          : { ...IDLE_SUBMISSION_STATE },
       })
       await get().refreshHistory()
     } catch (error) {
@@ -434,6 +463,114 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   setReportStatus: (status, error = null) => set({ reportStatus: status, reportError: error }),
 
+  adoptInviteCode: async (code) => {
+    const trimmed = code.trim()
+    if (!trimmed) return
+    const current = get().settings.inviteCode
+    if (current === trimmed) return
+    // Written straight into settings so a refresh mid-assessment cannot lose the code: losing it
+    // would leave the respondent staring at "缺少邀请码" with no idea what to do.
+    try {
+      const repos = await repositories()
+      const next = await repos.settings.patch({ inviteCode: trimmed })
+      set({ settings: next })
+    } catch {
+      // Not fatal: the code also travels in the URL, so the next boot re-adopts it.
+    }
+  },
+
+  submitToReview: async (contact) => {
+    const { session, result, settings } = get()
+    if (!session || !result) {
+      set({
+        submission: {
+          ...IDLE_SUBMISSION_STATE,
+          outcome: 'failed',
+          error: '还没有可以提交的结果。',
+          errorHint: '请先完成一次测评。',
+          errorTechnical: null,
+        },
+      })
+      return false
+    }
+
+    const { endpoint } = resolveSubmissionConfig(settings.reviewEndpoint)
+    // Re-adopt from the URL as a last resort: the respondent may have opened the link and answered
+    // without the settings write ever succeeding (private mode, storage disabled).
+    const inviteCode = settings.inviteCode || readInviteFromHash(window.location.hash) || ''
+
+    /**
+     * The idempotency key is created once and then persisted **before** the request goes out.
+     * Order matters: if the write happened after a successful submit, a crash in between would
+     * mint a new key on the next attempt and produce a second copy of the same material.
+     */
+    const clientSubmissionId = session.clientSubmissionId ?? crypto.randomUUID()
+    let working: AssessmentSession = session
+    if (!session.clientSubmissionId) {
+      working = { ...session, clientSubmissionId, updatedAt: new Date().toISOString() }
+      try {
+        const repos = await repositories()
+        await repos.sessions.put(working)
+        set({ session: working })
+      } catch {
+        // In-memory only; a retry in this tab still reuses the same key.
+      }
+    }
+
+    set({ submission: { ...IDLE_SUBMISSION_STATE, outcome: 'submitting' } })
+
+    const outcome = await submitAssessment({
+      endpoint,
+      inviteCode,
+      contactKind: contact.kind,
+      contactValue: contact.value,
+      clientSubmissionId,
+      session: working,
+      result,
+    })
+
+    if (!outcome.ok) {
+      set({
+        submission: {
+          ...IDLE_SUBMISSION_STATE,
+          outcome: 'failed',
+          error: outcome.error.message,
+          errorHint: outcome.error.hint,
+          errorTechnical: outcome.error.technical ?? null,
+        },
+      })
+      return false
+    }
+
+    const submittedAt = outcome.value.receivedAt
+    const updated: AssessmentSession = {
+      ...working,
+      submittedId: outcome.value.submissionId,
+      submittedAt,
+      updatedAt: new Date().toISOString(),
+    }
+    try {
+      const repos = await repositories()
+      await repos.sessions.put(updated)
+    } catch {
+      // The submission itself already succeeded; failing to record the id locally only means the
+      // banner is not restored after a reload, so this must not be reported as a failed submit.
+    }
+    set({
+      session: updated,
+      submission: {
+        outcome: outcome.value.status === 'existing' ? 'duplicate' : 'submitted',
+        submissionId: outcome.value.submissionId,
+        submittedAt,
+        error: null,
+        errorHint: null,
+        errorTechnical: null,
+      },
+    })
+    await get().refreshHistory()
+    return true
+  },
+
   clearAllData: async () => {
     try {
       const repos = await repositories()
@@ -451,6 +588,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         savedAt: null,
         reportStatus: 'idle',
         reportError: null,
+        submission: { ...IDLE_SUBMISSION_STATE },
         bootError: null,
       })
     } catch (error) {

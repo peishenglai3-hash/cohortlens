@@ -18,6 +18,7 @@ import {
 import { getRepositories } from '../../infrastructure/storage/index.ts'
 import { ALayerSection } from './ALayerSection.tsx'
 import { ReportPanel } from './ReportPanel.tsx'
+import { SubmitPanel } from './SubmitPanel.tsx'
 
 const LAYER_TITLES: Record<Layer, string> = {
   theory_value: 'A 层 · 理论与问题理解',
@@ -384,6 +385,14 @@ export function ResultPage() {
         onToggleOffline={() => setOffline((value) => !value)}
         onGenerate={() => void handleGenerateReport()}
       />
+
+      {/*
+        Submission sits after the optional AI report and before the engine diagnostics: it is the
+        step that actually hands the material to the requester, and it must be visible without
+        scrolling past internal detail. It renders its own "not configured" state, so a local-only
+        build says so instead of showing a dead button.
+      */}
+      <SubmitPanel />
 
       <section className="card">
         <h2>抽题引擎阶段实际状态</h2>

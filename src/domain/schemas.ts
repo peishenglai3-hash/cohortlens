@@ -433,6 +433,17 @@ export const assessmentSessionSchema = z
      */
     lastIndex: z.number().int().nonnegative().optional(),
 
+    /**
+     * 提交到审阅台的幂等键。生成一次之后就固定在这个会话里，重试、刷新、关掉再打开都用同一个。
+     *
+     * 没有它，一次"服务端写好了但响应没回来"的网络抖动会让审阅台收到两份一模一样的材料——
+     * 而审阅人无法判断那到底是两个人还是一次重试。
+     */
+    clientSubmissionId: z.string().min(1).optional(),
+    /** 服务端返回的提交 id。存在这里，所以刷新页面不会让作答者怀疑"我到底交上了没有"。 */
+    submittedId: z.string().min(1).optional(),
+    submittedAt: z.string().min(1).optional(),
+
     status: sessionStatusSchema,
     resultId: z.string().min(1).optional(),
   })

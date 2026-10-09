@@ -1,0 +1,20 @@
+﻿{
+  // Worker 与主应用共用一套契约（`src/domain/submission.ts`），但运行环境不同：
+  // Worker 跑在 workerd 里，没有 DOM。
+  //
+  // 这个项目**不用** `@cloudflare/workers-types` 的全局类型，理由记在 `worker/env.ts` 里：
+  // 把它拉进类型程序会静默覆盖浏览器全局（`D1Database.exec` 与 DOM 的 `Database` 撞名），
+  // 结果是主程序的 `indexedDB` 在类型层面消失、存储层报出一堆看似无关的错。
+  // 改成在 `worker/env.ts` 里结构化声明"我们用到的那几个方法"，两边就彻底隔离了。
+  //
+  // 放在仓库根而不是 worker/ 里：`extends: "./tsconfig.json"` 在子目录里会因为路径解析
+  // 指回自己而报 "Circularity detected"。
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "noEmit": true
+  },
+  "include": ["worker", "src/domain", "src/config/submission-config.ts"],
+  "exclude": ["node_modules", "dist", "dist-delivery", "delivery"]
+}

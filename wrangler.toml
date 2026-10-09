@@ -1,0 +1,53 @@
+# CohortLens 审阅台 Worker —— wrangler 配置
+#
+# 部署前必须做的三件事（缺任何一件都会失败，且失败方式是"前台说提交失败"，
+# 很难反查，所以这里逐条写清楚）：
+#
+#   1. 建库并建表
+#        npx wrangler d1 create cohortlens-reviews
+#      （把输出的 database_id 填到下面的占位处）
+#        npx wrangler d1 execute cohortlens-reviews --remote --file=worker/schema.sql
+#
+#   2. 设审阅台口令（至少 24 字符；这是**唯一**保护审阅台的凭据）
+#        npx wrangler secret put ADMIN_TOKEN
+#
+#   3. 发作答端地址写进 ALLOWED_ORIGINS
+#        在下面 vars 里改成你的 Pages 域名，或部署时用 --var 覆盖
+#
+# 然后：npx wrangler deploy
+
+name = "cohortlens-review"
+main = "worker/index.ts"
+compatibility_date = "2026-10-01"
+
+# 审阅台前端。由 `npm run build:admin` 产出到 worker/assets/。
+# 单页应用走 hash 路由，所以 not_found_handling 用 single-page-application。
+[assets]
+directory = "worker/assets"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+[vars]
+# 作答端的来源白名单，逗号分隔、精确匹配（含 scheme，不带结尾斜杠）。
+# 部署到 Pages 后把这里改成真实域名。留空时所有跨域提交都会被拒绝，
+# /api/health 会把这个配置问题报出来。
+ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:4173"
+
+# ---------------------------------------------------------------------------
+# D1 绑定
+# ---------------------------------------------------------------------------
+# 取消下面这段的注释并填入真实 database_id。占位符故意保持注释状态：
+# 一个填错的 id 会让 wrangler 部署失败并给出晦涩的错误，而"没配"至少是明确的。
+#
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "cohortlens-reviews"
+# database_id = "<把 wrangler d1 create 输出的 id 填在这里>"
+
+# ---------------------------------------------------------------------------
+# 可观测性（可选，默认关闭以免把提交正文写进日志）
+# ---------------------------------------------------------------------------
+# 打开 workers 日志会记录请求元数据。提交接口的请求体含真人作答与联系方式，
+# 因此这里不开 observability，需要排查时临时开、查完关。
+# [observability]
+# enabled = true

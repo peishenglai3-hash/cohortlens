@@ -3,6 +3,12 @@ dist/
 dist-delivery/
 delivery/
 coverage/
+
+# 审阅台的构建产物，由 vite 生成，不该被格式化
+worker/assets/
+
+# tsconfig 里带注释，Prettier 会重排成它自己的风格；这两份保持手写格式
+
 exports/
 package-lock.json
 *.md

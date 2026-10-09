@@ -1,0 +1,36 @@
+# 本地开发用的 wrangler 配置 —— `npx wrangler dev --config wrangler.local.toml`
+#
+# 为什么单独一份而不是复用 wrangler.toml：真正的 wrangler.toml 里 database_id 是留空的
+# （必须有真实 id 才能部署），而本地 dev 需要一个 id 才能建本地库。把两者分开，就不会出现
+# "为了让本地跑起来，把一个假 id 提交进部署配置"这种事——那会让部署在几周后以一种很难查的
+# 方式失败。
+#
+# 本地 D1 由 wrangler 在 .wrangler/state 下建一个真正的 SQLite，所以这里的所有查询行为与
+# 线上一致（包括 `?N` 绑定、索引、唯一约束），这正是我们要验的东西。
+#
+# 建表：
+#   npx wrangler d1 execute cohortlens-reviews --local --config wrangler.local.toml --file=worker/schema.sql
+# 起服务：
+#   npx wrangler dev --config wrangler.local.toml --port 8787
+# 造一个邀请码：
+#   npx wrangler d1 execute cohortlens-reviews --local --config wrangler.local.toml \
+#     --command="INSERT INTO invite_codes (id, code, label, max_uses, uses, active, expires_at, created_at) VALUES ('inv_local','LOCAL-DEV-CODE','local',0,0,1,NULL,'2026-10-09T00:00:00.000Z');"
+
+name = "cohortlens-review-local"
+main = "worker/index.ts"
+compatibility_date = "2026-10-01"
+
+[assets]
+directory = "worker/assets"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+[vars]
+# 作答端在本地跑在 5173（dev）或 4173（preview），两个都放进来方便切换。
+ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:4173,http://127.0.0.1:5173,http://127.0.0.1:4173"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "cohortlens-reviews"
+# 固定的假 id：本地库只按这个字符串定位 .wrangler/state 下的目录，不会联网。
+database_id = "00000000-0000-0000-0000-000000000000"

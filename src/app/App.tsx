@@ -7,6 +7,7 @@ import { HistoryPage } from '../pages/History/HistoryPage.tsx'
 import { SettingsPage } from '../pages/Settings/SettingsPage.tsx'
 import { AboutPage } from '../pages/About/AboutPage.tsx'
 import { PRODUCT_CONFIG } from '../config/product.ts'
+import { readInviteFromHash } from '../config/submission-config.ts'
 import { useAppStore } from './store.ts'
 
 /**
@@ -67,10 +68,25 @@ function Shell() {
   const bootStatus = useAppStore((state) => state.bootStatus)
   const bootError = useAppStore((state) => state.bootError)
   const boot = useAppStore((state) => state.boot)
+  const adoptInviteCode = useAppStore((state) => state.adoptInviteCode)
 
   useEffect(() => {
     if (bootStatus === 'idle') void boot()
   }, [bootStatus, boot])
+
+  /**
+   * Adopt the invite code carried by the link the requester sent.
+   *
+   * Reading it from `location.hash` rather than from the router keeps this working regardless of
+   * which route the link points at (`#/?invite=X` and `#/assessment?invite=X` both work), and it
+   * survives a refresh because the code is written into settings. Losing the code mid-assessment
+   * would leave the respondent unable to submit with no idea why.
+   */
+  useEffect(() => {
+    if (bootStatus !== 'ready') return
+    const code = readInviteFromHash(window.location.hash)
+    if (code) void adoptInviteCode(code)
+  }, [bootStatus, adoptInviteCode])
 
   if (bootStatus === 'idle' || bootStatus === 'loading') {
     return (

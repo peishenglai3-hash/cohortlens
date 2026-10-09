@@ -8,6 +8,12 @@ npm-debug.log*
 dist/
 dist-ssr/
 dist-delivery/
+
+# 审阅台的构建产物，由 npm run build:admin 生成
+worker/assets/
+
+# 本地校验截图（人工验看用，不属于交付物）
+/console-list-and-detail.png
 *.local
 
 # 甲方交付包：由 npm run pack:delivery 生成的可分发包。
@@ -30,6 +36,10 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+
+# Wrangler local secrets (contains a local-only admin token, never a real one)
+.dev.vars
+.wrangler/
 
 # Local assessment exports (may contain a respondent's raw answers)
 exports/

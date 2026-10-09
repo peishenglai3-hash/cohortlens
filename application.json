@@ -4,5 +4,6 @@
   "description": "本地优先的结构化测评工具：整理参与者已经主动表达的信息，不代替人做吸纳、排除或政治判断。",
   "themeColor": "#3b5b7a",
   "backgroundColor": "#f7f8fa",
-  "note": "产品名称的唯一可配置来源之一。最终名称尚未冻结：改这里的 name/shortName 即可，不需要动业务代码（Engineering Bible §64）。index.html 的标题与 PWA manifest 都从这里派生。"
+  "reviewEndpoint": "",
+  "note": "产品名称的唯一可配置来源之一。最终名称尚未冻结：改这里的 name/shortName 即可，不需要动业务代码（Engineering Bible §64）。index.html 的标题与 PWA manifest 都从这里派生。reviewEndpoint 是构建期固化的提交地址（Cloudflare Worker，例如 https://cohortlens-review.<account>.workers.dev）：留空表示这个构建不带后端，作答端只做本地测评与导出；填上之后公开链接打开即可直接提交。"
 }

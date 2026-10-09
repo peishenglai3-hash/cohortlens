@@ -75,6 +75,38 @@ npm run demo:assessment    # 命令行端到端跑一份真实结果 + 确定性
 
 `demo:assessment` 会在 `exports/demo-assessment-result.json` 导出结构化结果。作答是**模拟数据**（由种子驱动，不是真人），理由见 `docs/decisions/ADR-009`。
 
+## 公共链接（作答端 + 审阅台）
+
+把测评发给候选人，并在一处收齐所有材料。两套产物，两个地址：
+
+| 产物 | 部署到 | 命令 |
+|---|---|---|
+| 作答端（现有静态站） | Cloudflare Pages | `npm run build` + `npx wrangler pages deploy dist --project-name cohortlens` |
+| Worker + 审阅台 | Cloudflare Workers + D1 | `npm run build:admin` + `npx wrangler deploy` |
+
+完整步骤见 [公共链接部署手册](docs/deployment/public-link.md)（写给没参与开发的人）。
+
+```bash
+npm run build:admin        # 构建审阅台前端 -> worker/assets/
+npm run typecheck:worker   # Worker 单独一份 tsconfig（workerd 环境没有 DOM）
+npm run db:create          # 建 D1 库（一次性）
+npm run db:migrate         # 建表
+npm run db:invite -- --label "第一批" --max-uses 30 --days 14
+```
+
+本地把整条链路跑起来（作答端 + Worker + D1，不需要 Cloudflare 账号）：
+
+```bash
+npx wrangler d1 execute cohortlens-reviews --local --config wrangler.local.toml --file=worker/schema.sql
+npx wrangler dev --config wrangler.local.toml --port 8791
+```
+
+然后 Playwright 的 `tests/e2e/submission-flow.spec.ts` 会真的走一遍
+"作答 → 提交 → Worker → D1 → 审阅台读回 → 写判断"；Worker 没起时整组跳过，不会假通过。
+
+**审阅台不替任何人做判断。** 它呈现材料、要求审阅人自己写理由，没有"通过/不通过"这一栏——
+这是产品边界，不是未完成项。详见 [ADR-020](docs/decisions/ADR-020-backend-submission-and-review-console.md)。
+
 ## 工程闸门
 
 | 命令 | 覆盖 |
@@ -89,6 +121,7 @@ npm run demo:assessment    # 命令行端到端跑一份真实结果 + 确定性
 | `npm run validate:config` | 配置与内容一致性、密钥泄漏扫描 |
 | `npm run e2e` | Playwright 本地端到端（主流程 / AI 报告 / 离线 / PWA / 打印） |
 | `npm run verify:delivery` | 交付包独立验收：哈希、http 服务、单文件自包含性、凭据扫描 |
+| `npm run typecheck:worker` | Worker 单独类型检查（workerd 环境，不含 DOM 全局） |
 
 ## 目录结构
 
@@ -105,6 +138,9 @@ cohortlens/
 │  └─ prompts/report/v2.md      ← 报告 Prompt（人类可读镜像；v1.md 保留为历史）
 ├─ docs/decisions/              ← ADR-001 ~ ADR-019
 ├─ docs/migration/              ← 内容迁移说明（如 A 层 V1.0 -> V1.1）
+├─ docs/deployment/             ← 公共链接部署手册
+├─ worker/                      ← Cloudflare Worker：提交接口 + 审阅台后端 + D1 schema
+├─ admin/                       ← 审阅台前端（独立产物，构建到 worker/assets/）
 ├─ delivery/                    ← 甲方交付包（构建产物，gitignored）
 ├─ scripts/                     ← validate-question-pack / validate-config / demo-assessment
 ├─ src/
@@ -174,33 +210,48 @@ A 层素材于 2026-10-08 按甲方决定整体更换为 V1.1（`content/questio
 
 以上各条全部保留在 Known Content Issues 中，**不在工程阶段修改题库**（ADR-005、ADR-016）。`npm run validate:questions` 每次都把它们作为 Warning 报出来，不会沉默，也不会阻止本地构建。
 
+### 后端层（公共链接阶段引入）
+
+11. **审阅台只有一个口令，没有账号系统。** 拿到口令就能看到全部材料。人少时够用，多人协作前应换成 Cloudflare Access。
+12. **作答者不能自助撤回。** 撤回接口存在（软删），但界面上没暴露；需要业主在审阅台侧操作。
+13. **D1 免费额度有每日上限**（500 万行读 / 10 万行写，自 2026-09-01 起超限直接报错到 UTC 零点）。几百份材料远用不到，但批量导出要注意。
+14. **摘要存的是派生数据，带版本列。** 形状演进时旧行在读取时用正文重建并回写（自愈），但重建需要那次查询带上正文，因此列表与详情各有一条修复路径。
+15. **本地 Worker 的验收端口是 8791**，不是 wrangler 默认的 8787——本机上 8787 被另一个进程占用。这是环境事实，不是配置要求。
+
 ### 工程层
 
-10. **`confidence` 不是统计置信区间**，而是"覆盖度 × 一致性惩罚"（ADR-008）。
-11. **真实第三方端点的直连成功与否属于人工验收**。自动测试覆盖 7 种失败模式的分类，不承诺某个具体服务商在浏览器里可用（ADR-013）。
-12. **移动端 viewport 的 E2E 只在 Chromium 上跑过**，未在真实 iOS/Android 设备上验证。
+16. **`confidence` 不是统计置信区间**，而是"覆盖度 × 一致性惩罚"（ADR-008）。
+17. **真实第三方端点的直连成功与否属于人工验收**。自动测试覆盖 7 种失败模式的分类，不承诺某个具体服务商在浏览器里可用（ADR-013）。
+18. **移动端 viewport 的 E2E 只在 Chromium 上跑过**，未在真实 iOS/Android 设备上验证。
 
-## 明确 Deferred（本阶段不做，也不修）
+## 发布轨道
+
+公共链接这一步**已经实现并本地验证**（作答 → Worker → D1 → 审阅台全链路有 E2E 覆盖），
+但**尚未部署到任何真实域名**：Cloudflare 需要业主自己的账号凭据，本机没有，
+这是唯一剩下的阻塞项。见 [部署手册](docs/deployment/public-link.md)。
 
 ```
-GitHub Runner                — Deferred
-GitHub Pages deployment      — Deferred
-Remote CI / Remote Secrets   — Deferred
-Production PWA Deployment    — Deferred
+GitHub Runner / Remote CI    — Deferred（本地闸门够用，不引入远端 CI）
+GitHub Pages deployment      — 不使用（条款禁止把 Pages 用作收集用户数据的服务，见 ADR-020）
+Cloudflare Pages 部署        — 待业主账号（唯一阻塞项）
+Cloudflare Workers 部署      — 待业主账号（唯一阻塞项）
 ```
 
 `.github/workflows/ci.yml` 与 `deploy-pages.yml` **保留**，状态是 *Prepared / Not remotely verified*。`deploy-pages.yml` 为 manual-only，不会自动触发。上游的 base path 支持、静态构建支持、workflow 文件都**没有删除**，只是本阶段不投入工程时间。
 
-本阶段同样不做：中心数据库、账号系统、管理后台、Tauri / Electron、Cloud Sync、Team Dashboard、RAG、Agent、Analytics Platform。
+本阶段同样不做：账号系统（审阅台只有一个口令）、Tauri / Electron、Cloud Sync、Team Dashboard、RAG、Agent、Analytics Platform。
+中心数据库**已按需引入**：一个 Cloudflare D1，只存提交与审阅结论，见 ADR-020。
 
 ## 版本
 
-- 应用：`v0.1.1`（SemVer）
+- 应用：`v0.1.2`（SemVer）
 - 题库：`cohortlens-question-pack-v1.1@1.1.0`（A 层 V1.1）
 - 评分：`scoring-v1.1@1.1.0`
 - 角色模型：`roles-v1@1.0.0`（未变）
 - 报告 Prompt：`report-prompt-v2`
-- Git 标签：`engine-slice-v0.1`（仅引擎，已验收）、`local-mvp-v0.1`（Local MVP）、`a-layer-v1.1`（本次 A 层更换）
+- 提交格式：`cohortlens-submission@1.0`
+- 审阅摘要存储版本：`2`（`submissions.summary_version`）
+- Git 标签：`engine-slice-v0.1`（仅引擎，已验收）、`local-mvp-v0.1`（Local MVP）、`a-layer-v1.1`（A 层更换）、`public-link-v0.1`（公共链接 + 审阅台）
 
 ## 数学分数不代表什么
 
