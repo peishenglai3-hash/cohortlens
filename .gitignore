@@ -21,6 +21,9 @@ worker/assets/
 # 需要交付时重新生成并跑 npm run verify:delivery 核对即可。
 delivery/
 
+# 部署脚本的中间输出（含账号信息，不进版本库）
+deploy-output.txt
+
 # Test / coverage
 coverage/
 

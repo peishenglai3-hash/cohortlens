@@ -1,5 +1,16 @@
 # 公共链接部署手册
 
+> **本项目的部署已经完成。** 实际地址：
+>
+> | 用途 | 地址 |
+> |---|---|
+> | 作答链接（发给候选人） | https://cohortlens.pages.dev/ |
+> | 审阅台（只给你） | https://cohortlens-review.peishenglai3.workers.dev/ |
+> | 数据库 | Cloudflare D1 cohortlens-reviews (ed0a3b50-33c1-4e01-b7a1-7e69c2de471e) |
+>
+> 下文保留完整步骤，用于换账号、换域名或重建时照做。
+
+
 给一个**没参与开发**的人用。每一步都写明"为什么"和"成功了长什么样"。
 
 预计时间：25–40 分钟。全部在免费额度内。

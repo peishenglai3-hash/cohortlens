@@ -33,7 +33,8 @@
     "deploy:worker": "npm run build:admin && wrangler deploy",
     "db:create": "wrangler d1 create cohortlens-reviews",
     "db:migrate": "wrangler d1 execute cohortlens-reviews --remote --file=worker/schema.sql",
-    "db:invite": "tsx scripts/create-invite.ts"
+    "db:invite": "tsx scripts/create-invite.ts",
+    "deploy:step1": "tsx scripts/deploy-step1-cloudflare.ts"
   },
   "dependencies": {
     "idb": "^8.0.0",

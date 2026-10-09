@@ -225,15 +225,53 @@ test.describe('提交链路（作答端 → Worker → 审阅台）', () => {
   })
 })
 
-test.describe('作答端在没有配置审阅台时不会假装能提交', () => {
-  test('显示"不会上传任何内容"而不是一个点不动的按钮', async ({ page }) => {
+test.describe('提交面板按构建配置呈现正确的形态', () => {
+  /**
+   * Two legitimate builds, two legitimate panels:
+   *
+   *   - **本地专用构建**（`application.json` 的 `reviewEndpoint` 为空）：面板说"不会上传任何内容"，
+   *     并且**没有**提交按钮——一个点不动的按钮比一句话更糟。
+   *   - **已接入后端构建**（本项目现在的状态）：面板列出会上传什么、要求填联系方式、按钮可用。
+   *
+   * 这条用例按当前构建**实际**呈现的形态断言，而不是钉死其中一种。它原先写死了前者，
+   * 于是在 endpoint 被写进构建之后失败——那次失败是**测试过时**，不是产品坏了。
+   * 两种形态都断言，之后无论构建怎么配，它都会指出真正的问题。
+   */
+  test('本地专用构建说明不会上传；已接入构建给出提交前须知', async ({ page }) => {
     await resetLocalData(page)
     await openAssessment(page)
     await answerAllQuestions(page)
     await expect(page).toHaveURL(/#\/result/)
+
     const panel = page.getByTestId('submit-section')
     await expect(panel).toBeVisible()
-    await expect(panel).toContainText('不会上传任何内容')
-    await expect(page.getByTestId('submit-to-review')).toHaveCount(0)
+
+    const text = await panel.innerText()
+    const localOnly = text.includes('不会上传任何内容')
+    const wired = text.includes('你即将把这次测评的作答与结果上传')
+
+    expect(localOnly || wired, `提交面板既没说本地专用也没给提交须知：\n${text}`).toBe(true)
+    expect(localOnly && wired, '提交面板不能同时声称"不会上传"和"即将上传"').toBe(false)
+
+    if (localOnly) {
+      // 没有后端的构建不得给出一个点不动的按钮。
+      await expect(page.getByTestId('submit-to-review')).toHaveCount(0)
+    } else {
+      await expect(page.getByTestId('submit-notice')).toContainText(
+        '你即将把这次测评的作答与结果上传',
+      )
+      await expect(page.getByTestId('contact-value')).toBeVisible()
+
+      /**
+       * The submit button is deliberately disabled until a usable contact detail is present:
+       * without it the requester cannot attribute the material to a person, and the row would be
+       * useless to them. So the assertion is "disabled while empty, enabled once filled" — asserting
+       * only the second half would pass on a build that never guarded it at all.
+       */
+      const submit = page.getByTestId('submit-to-review')
+      await expect(submit).toBeDisabled()
+      await page.getByTestId('contact-value').fill('panel-shape@example.com')
+      await expect(submit).toBeEnabled()
+    }
   })
 })

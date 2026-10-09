@@ -31,7 +31,7 @@ not_found_handling = "single-page-application"
 # 作答端的来源白名单，逗号分隔、精确匹配（含 scheme，不带结尾斜杠）。
 # 部署到 Pages 后把这里改成真实域名。留空时所有跨域提交都会被拒绝，
 # /api/health 会把这个配置问题报出来。
-ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:4173"
+ALLOWED_ORIGINS = "https://cohortlens.pages.dev,https://663d0734.cohortlens.pages.dev"
 
 # ---------------------------------------------------------------------------
 # D1 绑定
@@ -39,10 +39,10 @@ ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:4173"
 # 取消下面这段的注释并填入真实 database_id。占位符故意保持注释状态：
 # 一个填错的 id 会让 wrangler 部署失败并给出晦涩的错误，而"没配"至少是明确的。
 #
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "cohortlens-reviews"
-# database_id = "<把 wrangler d1 create 输出的 id 填在这里>"
+[[d1_databases]]
+binding = "DB"
+database_name = "cohortlens-reviews"
+database_id = "ed0a3b50-33c1-4e01-b7a1-7e69c2de471e"
 
 # ---------------------------------------------------------------------------
 # 可观测性（可选，默认关闭以免把提交正文写进日志）
